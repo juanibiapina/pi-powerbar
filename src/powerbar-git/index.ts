@@ -29,7 +29,7 @@ function emitBranch(pi: ExtensionAPI, ctx: ExtensionContext): void {
 			id: "git-branch",
 			text: branch,
 			icon: "⎇",
-			color: "accent",
+			color: "muted",
 		});
 	} else {
 		pi.events.emit("powerbar:update", {

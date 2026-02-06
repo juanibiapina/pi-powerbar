@@ -61,7 +61,7 @@ function renderProgressBar(percent: number, width: number, theme: Theme, color: 
  */
 function renderSegmentText(segment: Segment, settings: PowerbarSettings, theme: Theme): string {
 	const parts: string[] = [];
-	const themeColor = (segment.color || "dim") as ThemeColor;
+	const themeColor = (segment.color || "muted") as ThemeColor;
 
 	if (segment.icon) {
 		parts.push(theme.fg(themeColor, segment.icon));
@@ -72,7 +72,7 @@ function renderSegmentText(segment: Segment, settings: PowerbarSettings, theme: 
 	}
 
 	if (segment.bar !== undefined) {
-		parts.push(renderProgressBar(segment.bar, settings.barWidth, theme, segment.color || "accent"));
+		parts.push(renderProgressBar(segment.bar, settings.barWidth, theme, segment.color || "muted"));
 	}
 
 	if (segment.suffix) {

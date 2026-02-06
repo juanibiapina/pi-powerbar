@@ -14,7 +14,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 function getColor(pct: number): string {
 	if (pct > 80) return "error";
 	if (pct > 60) return "warning";
-	return "accent";
+	return "muted";
 }
 
 function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | undefined): void {

@@ -11,7 +11,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 function getColor(pct: number): string {
 	if (pct > 80) return "error";
 	if (pct > 60) return "warning";
-	return "accent";
+	return "muted";
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
