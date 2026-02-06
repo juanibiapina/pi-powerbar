@@ -40,20 +40,15 @@ pi.events.emit("powerbar:update", {
 
 ### Configuration
 
-Settings are stored in `~/.pi/agent/pi-powerbar-settings.json`:
+Settings are managed through [`pi-extension-settings`](https://github.com/juanibiapina/pi-extension-settings) and can be changed via the `/settings` command in pi.
 
-```json
-{
-  "left": ["git-branch", "sub-usage"],
-  "right": ["model", "tokens"],
-  "separator": " │ ",
-  "placement": "belowEditor"
-}
-```
-
-- **left** / **right** — Ordered list of segment IDs controlling placement and order.
-- **separator** — String drawn between segments on the same side.
-- **placement** — Where the widget renders (`"belowEditor"`).
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Left segments** | Comma-separated segment IDs for the left side | `git-branch,tokens,context-usage` |
+| **Right segments** | Comma-separated segment IDs for the right side | `model,sub-hourly,sub-weekly` |
+| **Separator** | String drawn between segments on the same side | ` │ ` |
+| **Placement** | Where the powerbar appears (`belowEditor` or `aboveEditor`) | `belowEditor` |
+| **Bar width** | Width of progress bars in characters (4–24) | `10` |
 
 Segments not listed in either side are ignored.
 
