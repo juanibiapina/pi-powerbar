@@ -14,10 +14,7 @@ pi install npm:@juanibiapina/pi-powerbar
 
 The powerbar renders a widget with two sides, like tmux:
 
-```
-│ ⎇ main │ 42% used          model: sonnet │ 12k tokens │
-  ← left →                    ←── right ──→
-```
+![powerbar screenshot](screenshot.png)
 
 ### Producing segments
 
