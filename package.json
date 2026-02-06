@@ -24,7 +24,10 @@
 		"status-bar"
 	],
 	"pi": {
-		"extensions": ["./dist/index.js"]
+		"extensions": [
+			"./dist",
+			"node_modules/@marckrenn/pi-sub-core/index.ts"
+		]
 	},
 	"author": "Juan Ibiapina",
 	"license": "MIT",
@@ -39,8 +42,14 @@
 		"@mariozechner/pi-coding-agent": "*",
 		"@mariozechner/pi-tui": "*"
 	},
+	"dependencies": {
+		"@juanibiapina/pi-extension-settings": "^0.4.0",
+		"@marckrenn/pi-sub-core": "^1.0.5"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.5",
+		"@juanibiapina/pi-extension-settings": "^0.4.0",
+		"@marckrenn/pi-sub-shared": "^1.0.5",
 		"@mariozechner/pi-coding-agent": "^0.51.1",
 		"@types/node": "^22.10.5",
 		"typescript": "^5.9.2"
