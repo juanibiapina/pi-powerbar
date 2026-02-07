@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Provider producer: shows the current LLM provider name (e.g. anthropic, openai)
+
 ## 0.3.1
 
 - Fix: gracefully handle overflow by shrinking the widest segment instead of crashing

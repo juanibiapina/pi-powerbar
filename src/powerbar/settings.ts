@@ -19,7 +19,7 @@ export const SETTINGS_DEFINITIONS: SettingDefinition[] = [
 		id: "right",
 		label: "Right segments",
 		description: "Comma-separated segment IDs for the right side",
-		defaultValue: "model,sub-hourly,sub-weekly",
+		defaultValue: "provider,model,sub-hourly,sub-weekly",
 	},
 	{
 		id: "separator",
@@ -61,7 +61,7 @@ export function registerSettings(pi: ExtensionAPI): void {
 
 export function loadSettings(): PowerbarSettings {
 	const leftStr = getSetting(EXTENSION_NAME, "left", "git-branch,tokens,context-usage") ?? "";
-	const rightStr = getSetting(EXTENSION_NAME, "right", "model,sub-hourly,sub-weekly") ?? "";
+	const rightStr = getSetting(EXTENSION_NAME, "right", "provider,model,sub-hourly,sub-weekly") ?? "";
 	const separator = getSetting(EXTENSION_NAME, "separator", " │ ") ?? " │ ";
 	const placement = getSetting(EXTENSION_NAME, "placement", "belowEditor") ?? "belowEditor";
 	const barWidthStr = getSetting(EXTENSION_NAME, "bar-width", "10") ?? "10";

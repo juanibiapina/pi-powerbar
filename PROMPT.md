@@ -13,6 +13,7 @@ package.json  →  "pi": { "extensions": ["./dist", "node_modules/@marckrenn/pi-
 
 dist/
 ├── powerbar/           ← core renderer (event listener + widget)
+├── powerbar-provider/  ← producer: current LLM provider name
 ├── powerbar-model/     ← producer: current model + thinking level
 ├── powerbar-context/   ← producer: context window usage bar
 ├── powerbar-tokens/    ← producer: cumulative token counts + cost
@@ -45,10 +46,13 @@ Users can disable specific extensions via pi's package filtering:
 ## Architecture
 
 ```
-┌──────────────────┐   powerbar:update   ┌─────────────────────┐
-│  powerbar-model  │────────────────────▶│                     │
-└──────────────────┘                      │     powerbar        │
+┌────────────────────┐ powerbar:update   ┌─────────────────────┐
+│ powerbar-provider  │──────────────────▶│                     │
+└────────────────────┘                    │     powerbar        │
 ┌──────────────────┐   powerbar:update   │    (core ext)       │
+│  powerbar-model  │────────────────────▶│                     │
+└──────────────────┘                      │                     │
+┌──────────────────┐   powerbar:update   │                     │
 │ powerbar-context │────────────────────▶│                     │
 └──────────────────┘                      │  ┌───────────────┐  │
 ┌──────────────────┐   powerbar:update   │  │ segment store  │  │
@@ -103,7 +107,7 @@ Settings:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `left` | comma-separated string | `"git-branch,tokens,context-usage"` | Ordered segment IDs for left side |
-| `right` | comma-separated string | `"model,sub-hourly,sub-weekly"` | Ordered segment IDs for right side |
+| `right` | comma-separated string | `"provider,model,sub-hourly,sub-weekly"` | Ordered segment IDs for right side |
 | `separator` | string | `" │ "` | Drawn between segments on the same side |
 | `placement` | string | `"belowEditor"` | Widget placement |
 | `bar-width` | number | `10` | Character width of progress bars |
@@ -210,6 +214,15 @@ Shows context window usage as a progress bar with percentage.
 - **Color:** accent (< 60%) → warning (60–80%) → error (> 80%)
 - **Format:** `▎          2%` (bar + suffix)
 
+### powerbar-provider
+
+Shows the current LLM provider name.
+
+- **Segment ID:** `provider`
+- **Listens to:** `session_start`, `session_switch`, `model_select`, `turn_start`
+- **Data source:** `ctx.model.provider`
+- **Format:** `anthropic`
+
 ### powerbar-model
 
 Shows the current model ID and thinking level.
@@ -253,6 +266,8 @@ src/
 │   ├── index.ts           # Core extension: event listener + widget + footer hiding
 │   ├── settings.ts        # Load settings via pi-extension-settings
 │   └── render.ts          # Build the left │ right line with progress bars
+├── powerbar-provider/
+│   └── index.ts           # Producer: LLM provider name
 ├── powerbar-model/
 │   └── index.ts           # Producer: model name + thinking level
 ├── powerbar-context/

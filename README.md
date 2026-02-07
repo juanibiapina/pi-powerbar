@@ -45,7 +45,7 @@ Settings are managed through [`pi-extension-settings`](https://github.com/juanib
 | Setting | Description | Default |
 |---------|-------------|---------|
 | **Left segments** | Comma-separated segment IDs for the left side | `git-branch,tokens,context-usage` |
-| **Right segments** | Comma-separated segment IDs for the right side | `model,sub-hourly,sub-weekly` |
+| **Right segments** | Comma-separated segment IDs for the right side | `provider,model,sub-hourly,sub-weekly` |
 | **Separator** | String drawn between segments on the same side | ` │ ` |
 | **Placement** | Where the powerbar appears (`belowEditor` or `aboveEditor`) | `belowEditor` |
 | **Bar width** | Width of progress bars in characters (4–24) | `10` |
