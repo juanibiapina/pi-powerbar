@@ -10,6 +10,8 @@ Any other pi extension can update segments by emitting a single `powerbar:update
 pi install npm:@juanibiapina/pi-powerbar
 ```
 
+> **⚠️ Load Order:** `pi-powerbar` must appear **after** `pi-extension-settings` and **before** any segment-emitting extensions in your `packages` array in `~/.pi/settings.json`. It registers settings at load time (requiring `pi-extension-settings` to already be loaded), and segment emitters send events that `pi-powerbar` must be ready to receive.
+
 ## Usage
 
 The powerbar renders a widget with two sides, like tmux:
