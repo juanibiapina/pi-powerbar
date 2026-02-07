@@ -52,6 +52,9 @@ function emitUsage(pi: ExtensionAPI, usage: UsageSnapshot | undefined): void {
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:register-segment", { id: "sub-hourly", label: "Sub Hourly" });
+	pi.events.emit("powerbar:register-segment", { id: "sub-weekly", label: "Sub Weekly" });
+
 	pi.events.on("sub-core:ready", (payload: unknown) => {
 		const data = payload as { state?: SubCoreState };
 		emitUsage(pi, data.state?.usage);

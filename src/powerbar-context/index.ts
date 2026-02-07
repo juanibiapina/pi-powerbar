@@ -36,6 +36,8 @@ function resetContextUsage(pi: ExtensionAPI): void {
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:register-segment", { id: "context-usage", label: "Context Usage" });
+
 	// Reset on new/switched session
 	pi.on("session_start", async () => resetContextUsage(pi));
 	pi.on("session_switch", async () => resetContextUsage(pi));

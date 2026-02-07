@@ -2,47 +2,11 @@
  * Settings for the powerbar via pi-extension-settings.
  */
 
-import type { SettingDefinition } from "@juanibiapina/pi-extension-settings";
+import type { OrderedListOption, SettingDefinition } from "@juanibiapina/pi-extension-settings";
 import { getSetting } from "@juanibiapina/pi-extension-settings";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
 export const EXTENSION_NAME = "powerbar";
-
-export const SETTINGS_DEFINITIONS: SettingDefinition[] = [
-	{
-		id: "left",
-		label: "Left segments",
-		description: "Comma-separated segment IDs for the left side",
-		defaultValue: "git-branch,tokens,context-usage",
-	},
-	{
-		id: "right",
-		label: "Right segments",
-		description: "Comma-separated segment IDs for the right side",
-		defaultValue: "provider,model,sub-hourly,sub-weekly",
-	},
-	{
-		id: "separator",
-		label: "Separator",
-		description: "Separator between segments",
-		defaultValue: " │ ",
-		values: [" │ ", " ┃ ", " | ", " · ", "  "],
-	},
-	{
-		id: "placement",
-		label: "Placement",
-		description: "Where the powerbar appears",
-		defaultValue: "belowEditor",
-		values: ["belowEditor", "aboveEditor"],
-	},
-	{
-		id: "bar-width",
-		label: "Bar width",
-		description: "Width of progress bars in characters",
-		defaultValue: "10",
-		values: ["6", "8", "10", "12", "16"],
-	},
-];
 
 export interface PowerbarSettings {
 	left: string[];
@@ -52,10 +16,48 @@ export interface PowerbarSettings {
 	barWidth: number;
 }
 
-export function registerSettings(pi: ExtensionAPI): void {
+export function registerSettings(pi: ExtensionAPI, segmentOptions: OrderedListOption[]): void {
+	const definitions: SettingDefinition[] = [
+		{
+			id: "left",
+			label: "Left segments",
+			description: "Segments shown on the left side of the powerbar",
+			defaultValue: "git-branch,tokens,context-usage",
+			options: segmentOptions,
+		},
+		{
+			id: "right",
+			label: "Right segments",
+			description: "Segments shown on the right side of the powerbar",
+			defaultValue: "provider,model,sub-hourly,sub-weekly",
+			options: segmentOptions,
+		},
+		{
+			id: "separator",
+			label: "Separator",
+			description: "Separator between segments",
+			defaultValue: " │ ",
+			values: [" │ ", " ┃ ", " | ", " · ", "  "],
+		},
+		{
+			id: "placement",
+			label: "Placement",
+			description: "Where the powerbar appears",
+			defaultValue: "belowEditor",
+			values: ["belowEditor", "aboveEditor"],
+		},
+		{
+			id: "bar-width",
+			label: "Bar width",
+			description: "Width of progress bars in characters",
+			defaultValue: "10",
+			values: ["6", "8", "10", "12", "16"],
+		},
+	];
+
 	pi.events.emit("pi-extension-settings:register", {
 		name: EXTENSION_NAME,
-		settings: SETTINGS_DEFINITIONS,
+		settings: definitions,
 	});
 }
 

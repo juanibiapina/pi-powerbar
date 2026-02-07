@@ -5,6 +5,7 @@
  * maintains a segment store, and renders a powerline-style widget.
  */
 
+import type { OrderedListOption } from "@juanibiapina/pi-extension-settings";
 import type { ExtensionAPI, ExtensionUIContext, Theme } from "@mariozechner/pi-coding-agent";
 import type { Component, TUI } from "@mariozechner/pi-tui";
 import { renderBar, type Segment } from "./render.js";
@@ -19,13 +20,27 @@ interface PowerbarUpdatePayload {
 	bar?: number;
 }
 
+interface SegmentRegistration {
+	id: string;
+	label: string;
+}
+
 export default function createExtension(pi: ExtensionAPI): void {
 	const segments: Map<string, Segment> = new Map();
+	const segmentCatalog: Map<string, OrderedListOption> = new Map();
 	let settings: PowerbarSettings;
 	let currentCtx: { ui: { setWidget: (...args: any[]) => void }; hasUI: boolean } | undefined;
 
-	// Register settings for the /settings UI
-	registerSettings(pi);
+	// Register settings with empty options initially (no segments known yet)
+	registerSettings(pi, []);
+
+	// Listen for segment registrations from producer extensions
+	pi.events.on("powerbar:register-segment", (data: unknown) => {
+		const { id, label } = data as SegmentRegistration;
+		segmentCatalog.set(id, { id, label });
+		// Re-register settings with updated segment options
+		registerSettings(pi, Array.from(segmentCatalog.values()));
+	});
 
 	function refresh(): void {
 		if (!currentCtx?.hasUI) return;

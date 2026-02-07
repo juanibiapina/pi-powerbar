@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Segment registration: producer extensions now register their segments via `powerbar:register-segment` events, enabling any extension to declare segments for the settings menu
+- Left/right segment settings now open an ordered multi-select menu (toggle on/off, reorder with Shift+↑/↓) instead of requiring manual comma-separated input
+- Requires `@juanibiapina/pi-extension-settings` >= 0.5.0 for `options` support
+
 ## 0.4.0
 
 - Provider producer: shows the current LLM provider name (e.g. anthropic, openai)

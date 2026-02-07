@@ -28,6 +28,8 @@ function emitModel(pi: ExtensionAPI, ctx: ExtensionContext): void {
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:register-segment", { id: "model", label: "Model" });
+
 	pi.on("session_start", async (_event, ctx) => {
 		emitModel(pi, ctx);
 	});

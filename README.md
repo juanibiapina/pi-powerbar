@@ -18,7 +18,16 @@ The powerbar renders a widget with two sides, like tmux:
 
 ### Producing segments
 
-Any extension can update a segment:
+Any extension can register and update a segment. First, register the segment so it appears in the settings menu:
+
+```typescript
+pi.events.emit("powerbar:register-segment", {
+  id: "git-branch",
+  label: "Git Branch",
+});
+```
+
+Then update it with data:
 
 ```typescript
 pi.events.emit("powerbar:update", {
@@ -52,17 +61,17 @@ pi.events.emit("powerbar:update", {
 
 ### Configuration
 
-Settings are managed through [`pi-extension-settings`](https://github.com/juanibiapina/pi-extension-settings) and can be changed via the `/settings` command in pi.
+Settings are managed through [`pi-extension-settings`](https://github.com/juanibiapina/pi-extension-settings) and can be changed via the `/extension-settings` command in pi.
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| **Left segments** | Comma-separated segment IDs for the left side | `git-branch,tokens,context-usage` |
-| **Right segments** | Comma-separated segment IDs for the right side | `provider,model,sub-hourly,sub-weekly` |
+| **Left segments** | Segments shown on the left side (ordered multi-select menu) | `git-branch,tokens,context-usage` |
+| **Right segments** | Segments shown on the right side (ordered multi-select menu) | `provider,model,sub-hourly,sub-weekly` |
 | **Separator** | String drawn between segments on the same side | ` │ ` |
 | **Placement** | Where the powerbar appears (`belowEditor` or `aboveEditor`) | `belowEditor` |
 | **Bar width** | Width of progress bars in characters (4–24) | `10` |
 
-Segments not listed in either side are ignored.
+The left and right segment settings open an interactive menu where you can toggle segments on/off and reorder them with Shift+↑/↓. All segments registered via `powerbar:register-segment` appear as options. Segments not listed in either side are ignored.
 
 ## Development
 

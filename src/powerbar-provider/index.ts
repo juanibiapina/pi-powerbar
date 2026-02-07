@@ -19,6 +19,8 @@ function emitProvider(pi: ExtensionAPI, ctx: ExtensionContext): void {
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:register-segment", { id: "provider", label: "Provider" });
+
 	pi.on("session_start", async (_event, ctx) => {
 		emitProvider(pi, ctx);
 	});

@@ -54,6 +54,8 @@ function resetTokens(pi: ExtensionAPI): void {
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:register-segment", { id: "tokens", label: "Tokens" });
+
 	// Reset on new/switched session
 	pi.on("session_start", async () => resetTokens(pi));
 	pi.on("session_switch", async () => resetTokens(pi));
