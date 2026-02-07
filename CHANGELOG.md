@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.1
+
 - Fix: hide context segment instead of showing 0% on new session
 
 ## 0.2.0
