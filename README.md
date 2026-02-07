@@ -38,6 +38,18 @@ pi.events.emit("powerbar:update", {
 });
 ```
 
+### Built-in segments
+
+| Segment ID | Description |
+|------------|-------------|
+| `git-branch` | Current git branch (refreshes after bash commands) |
+| `tokens` | Cumulative input/output tokens and session cost (e.g. `↑9 ↓270 $0.11`) |
+| `context-usage` | Context window usage as a progress bar with percentage |
+| `provider` | Current LLM provider name (e.g. `anthropic`, `openai`) |
+| `model` | Current model name and thinking level |
+| `sub-hourly` | Hourly subscription usage from [pi-sub-core](https://github.com/marckrenn/pi-sub-core) |
+| `sub-weekly` | Weekly subscription usage from pi-sub-core |
+
 ### Configuration
 
 Settings are managed through [`pi-extension-settings`](https://github.com/juanibiapina/pi-extension-settings) and can be changed via the `/settings` command in pi.
