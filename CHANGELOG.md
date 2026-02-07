@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix: gracefully handle overflow by shrinking the widest segment instead of crashing
+
 ## 0.3.0
 
 - Token producer: reset on new session or session switch (hide stale values)

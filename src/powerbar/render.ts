@@ -7,7 +7,7 @@
  */
 
 import type { Theme, ThemeColor } from "@mariozechner/pi-coding-agent";
-import { visibleWidth } from "@mariozechner/pi-tui";
+import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 import type { PowerbarSettings } from "./settings.js";
 
 export interface Segment {
@@ -82,14 +82,54 @@ function renderSegmentText(segment: Segment, settings: PowerbarSettings, theme: 
 	return parts.join(" ");
 }
 
-function renderSide(ids: string[], segments: Map<string, Segment>, settings: PowerbarSettings, theme: Theme): string {
-	const rendered: string[] = [];
+interface RenderedSegment {
+	text: string;
+	width: number;
+}
+
+function renderSideSegments(
+	ids: string[],
+	segments: Map<string, Segment>,
+	settings: PowerbarSettings,
+	theme: Theme,
+): RenderedSegment[] {
+	const rendered: RenderedSegment[] = [];
 	for (const id of ids) {
 		const seg = segments.get(id);
 		if (!seg || (!seg.text && !seg.suffix && seg.bar === undefined)) continue;
-		rendered.push(renderSegmentText(seg, settings, theme));
+		const text = renderSegmentText(seg, settings, theme);
+		rendered.push({ text, width: visibleWidth(text) });
 	}
-	return rendered.join(theme.fg("dim", settings.separator));
+	return rendered;
+}
+
+function joinSegments(segments: RenderedSegment[], separator: string, separatorWidth: number): RenderedSegment {
+	if (segments.length === 0) return { text: "", width: 0 };
+	const text = segments.map((s) => s.text).join(separator);
+	const width = segments.reduce((sum, s) => sum + s.width, 0) + separatorWidth * (segments.length - 1);
+	return { text, width };
+}
+
+/**
+ * Truncate the widest segment to reclaim overflow space.
+ * Mutates the array in place and returns the new total width.
+ */
+function shrinkWidest(segments: RenderedSegment[], overflow: number): void {
+	if (segments.length === 0) return;
+
+	let widestIdx = 0;
+	for (let i = 1; i < segments.length; i++) {
+		if (segments[i].width > segments[widestIdx].width) {
+			widestIdx = i;
+		}
+	}
+
+	const seg = segments[widestIdx];
+	const targetWidth = Math.max(1, seg.width - overflow);
+	segments[widestIdx] = {
+		text: truncateToWidth(seg.text, targetWidth, "…"),
+		width: targetWidth,
+	};
 }
 
 export function renderBar(
@@ -98,13 +138,39 @@ export function renderBar(
 	theme: Theme,
 	width: number,
 ): string {
-	const leftStr = renderSide(settings.left, segments, settings, theme);
-	const rightStr = renderSide(settings.right, segments, settings, theme);
+	const separator = theme.fg("dim", settings.separator);
+	const separatorWidth = visibleWidth(separator);
 
-	const leftWidth = visibleWidth(leftStr);
-	const rightWidth = visibleWidth(rightStr);
+	const leftSegs = renderSideSegments(settings.left, segments, settings, theme);
+	const rightSegs = renderSideSegments(settings.right, segments, settings, theme);
+	const allSegs = [...leftSegs, ...rightSegs];
 
-	const padding = Math.max(1, width - leftWidth - rightWidth);
+	// Calculate total content width (segments + separators within each side + 1 for minimum padding)
+	const leftSepCount = Math.max(0, leftSegs.length - 1);
+	const rightSepCount = Math.max(0, rightSegs.length - 1);
+	const totalSepWidth = (leftSepCount + rightSepCount) * separatorWidth;
+	const totalSegWidth = allSegs.reduce((sum, s) => sum + s.width, 0);
+	const minPadding = 1;
+	const totalNeeded = totalSegWidth + totalSepWidth + minPadding;
 
-	return `${leftStr}${" ".repeat(padding)}${rightStr}`;
+	// Shrink the widest segment(s) until it fits
+	if (totalNeeded > width) {
+		let overflow = totalNeeded - width;
+		const maxPasses = allSegs.length;
+		for (let i = 0; i < maxPasses && overflow > 0; i++) {
+			shrinkWidest(allSegs, overflow);
+			const newSegWidth = allSegs.reduce((sum, s) => sum + s.width, 0);
+			overflow = newSegWidth + totalSepWidth + minPadding - width;
+		}
+	}
+
+	// Rebuild left/right from the (possibly truncated) segments
+	const left = joinSegments(allSegs.slice(0, leftSegs.length), separator, separatorWidth);
+	const right = joinSegments(allSegs.slice(leftSegs.length), separator, separatorWidth);
+
+	const padding = Math.max(minPadding, width - left.width - right.width);
+	const line = `${left.text}${" ".repeat(padding)}${right.text}`;
+
+	// Safety net
+	return truncateToWidth(line, width, "…");
 }
