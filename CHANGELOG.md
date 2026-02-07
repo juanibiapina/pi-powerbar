@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0
+
 - Provider producer: shows the current LLM provider name (e.g. anthropic, openai)
 
 ## 0.3.1
