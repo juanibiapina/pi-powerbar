@@ -1,34 +1,41 @@
 # Changelog
 
-## 0.5.0
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.5.0] - 2026-02-07
 
 - Segment registration: producer extensions now register their segments via `powerbar:register-segment` events, enabling any extension to declare segments for the settings menu
 - Left/right segment settings now open an ordered multi-select menu (toggle on/off, reorder with Shift+↑/↓) instead of requiring manual comma-separated input
 - Requires `@juanibiapina/pi-extension-settings` >= 0.5.0 for `options` support
 
-## 0.4.0
+## [0.4.0] - 2026-02-07
 
 - Provider producer: shows the current LLM provider name (e.g. anthropic, openai)
 
-## 0.3.1
+## [0.3.1] - 2026-02-07
 
 - Fix: gracefully handle overflow by shrinking the widest segment instead of crashing
 
-## 0.3.0
+## [0.3.0] - 2026-02-07
 
 - Token producer: reset on new session or session switch (hide stale values)
 - Token producer: update on every tool result for more frequent feedback
 
-## 0.2.1
+## [0.2.1] - 2026-02-07
 
 - Fix: hide context segment instead of showing 0% on new session
 
-## 0.2.0
+## [0.2.0] - 2026-02-07
 
 - Context usage producer: update on every tool result (not just turn end) for more frequent feedback
 - Context usage producer: reset to 0% on new session or session switch
 
-## 0.1.0
+## [0.1.0] - 2026-02-06
 
 - Initial release
 - Powerbar core: persistent powerline-style widget with left/right segment layout
