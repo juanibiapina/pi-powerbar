@@ -1,6 +1,6 @@
 {
 	"name": "@juanibiapina/pi-powerbar",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Pi extension that renders a persistent powerline status bar with left/right segments updated via events",
 	"type": "module",
 	"main": "dist/index.js",
