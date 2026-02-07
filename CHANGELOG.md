@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.0
+
 - Token producer: reset on new session or session switch (hide stale values)
 - Token producer: update on every tool result for more frequent feedback
 
