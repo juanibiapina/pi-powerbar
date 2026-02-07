@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Context usage producer: update on every tool result (not just turn end) for more frequent feedback
+- Context usage producer: reset to 0% on new session or session switch
+
 ## 0.1.0
 
 - Initial release
