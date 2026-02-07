@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix: hide context segment instead of showing 0% on new session
+
 ## 0.2.0
 
 - Context usage producer: update on every tool result (not just turn end) for more frequent feedback

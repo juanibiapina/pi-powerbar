@@ -31,10 +31,7 @@ function emitContextUsage(pi: ExtensionAPI, ctx: ExtensionContext): void {
 function resetContextUsage(pi: ExtensionAPI): void {
 	pi.events.emit("powerbar:update", {
 		id: "context-usage",
-		text: "",
-		suffix: "0%",
-		bar: 0,
-		color: "muted",
+		text: undefined,
 	});
 }
 
