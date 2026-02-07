@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 - Segment registration: producer extensions now register their segments via `powerbar:register-segment` events, enabling any extension to declare segments for the settings menu
 - Left/right segment settings now open an ordered multi-select menu (toggle on/off, reorder with Shift+↑/↓) instead of requiring manual comma-separated input
