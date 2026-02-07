@@ -46,8 +46,19 @@ function emitTokens(pi: ExtensionAPI, ctx: ExtensionContext): void {
 	});
 }
 
-export default function createExtension(pi: ExtensionAPI): void {
-	pi.on("turn_end", async (_event, ctx) => {
-		emitTokens(pi, ctx);
+function resetTokens(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:update", {
+		id: "tokens",
+		text: undefined,
 	});
+}
+
+export default function createExtension(pi: ExtensionAPI): void {
+	// Reset on new/switched session
+	pi.on("session_start", async () => resetTokens(pi));
+	pi.on("session_switch", async () => resetTokens(pi));
+
+	// Update frequently during agent work
+	pi.on("tool_result", async (_event, ctx) => emitTokens(pi, ctx));
+	pi.on("turn_end", async (_event, ctx) => emitTokens(pi, ctx));
 }

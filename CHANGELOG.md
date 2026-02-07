@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Token producer: reset on new session or session switch (hide stale values)
+- Token producer: update on every tool result for more frequent feedback
+
 ## 0.2.1
 
 - Fix: hide context segment instead of showing 0% on new session
