@@ -67,7 +67,11 @@ export default function createExtension(pi: ExtensionAPI): void {
 
 	pi.events.on("sub-core:update-all", (payload: unknown) => {
 		const data = payload as { state?: SubCoreAllState };
-		const entry = data.state?.entries?.[0];
+		// Find the entry matching the current provider, or fall back to first entry
+		const currentProvider = data.state?.provider;
+		const entry = currentProvider
+			? data.state?.entries?.find((e) => e.provider === currentProvider)
+			: data.state?.entries?.[0];
 		emitUsage(pi, entry?.usage);
 	});
 }

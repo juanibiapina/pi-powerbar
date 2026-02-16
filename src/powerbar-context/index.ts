@@ -16,7 +16,7 @@ function getColor(pct: number): string {
 
 function emitContextUsage(pi: ExtensionAPI, ctx: ExtensionContext): void {
 	const usage = ctx.getContextUsage();
-	if (usage) {
+	if (usage && usage.tokens != null) {
 		const pct = Math.round((usage.tokens / usage.contextWindow) * 100);
 		pi.events.emit("powerbar:update", {
 			id: "context-usage",

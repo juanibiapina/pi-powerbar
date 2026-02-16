@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Updated all dependencies to latest versions
+- Fix: subscription producer now matches the current provider's entry in `update-all` events instead of blindly using the first entry
+
 ## [0.5.0] - 2026-02-07
 
 - Segment registration: producer extensions now register their segments via `powerbar:register-segment` events, enabling any extension to declare segments for the settings menu
