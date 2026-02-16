@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-16
+
 - Updated all dependencies to latest versions
 - Fix: subscription producer now matches the current provider's entry in `update-all` events instead of blindly using the first entry
 
