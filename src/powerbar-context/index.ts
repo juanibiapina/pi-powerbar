@@ -8,6 +8,8 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 
+const CHUNK_SIZE = 100_000;
+
 function getColor(pct: number): string {
 	if (pct > 80) return "error";
 	if (pct > 60) return "warning";
@@ -23,6 +25,7 @@ function emitContextUsage(pi: ExtensionAPI, ctx: ExtensionContext): void {
 			text: "",
 			suffix: `${pct}%`,
 			bar: pct,
+			barSegments: Math.ceil(usage.contextWindow / CHUNK_SIZE),
 			color: getColor(pct),
 		});
 	}

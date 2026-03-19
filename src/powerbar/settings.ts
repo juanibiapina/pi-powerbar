@@ -14,6 +14,7 @@ export interface PowerbarSettings {
 	separator: string;
 	placement: "aboveEditor" | "belowEditor";
 	barWidth: number;
+	barStyle: "continuous" | "blocks";
 }
 
 export function registerSettings(pi: ExtensionAPI, segmentOptions: OrderedListOption[]): void {
@@ -47,6 +48,13 @@ export function registerSettings(pi: ExtensionAPI, segmentOptions: OrderedListOp
 			values: ["belowEditor", "aboveEditor"],
 		},
 		{
+			id: "bar-style",
+			label: "Bar style",
+			description: "Visual style of progress bars",
+			defaultValue: "blocks",
+			values: ["continuous", "blocks"],
+		},
+		{
 			id: "bar-width",
 			label: "Bar width",
 			description: "Width of progress bars in characters",
@@ -66,6 +74,7 @@ export function loadSettings(): PowerbarSettings {
 	const rightStr = getSetting(EXTENSION_NAME, "right", "provider,model,sub-hourly,sub-weekly") ?? "";
 	const separator = getSetting(EXTENSION_NAME, "separator", " │ ") ?? " │ ";
 	const placement = getSetting(EXTENSION_NAME, "placement", "belowEditor") ?? "belowEditor";
+	const barStyle = getSetting(EXTENSION_NAME, "bar-style", "blocks") ?? "blocks";
 	const barWidthStr = getSetting(EXTENSION_NAME, "bar-width", "10") ?? "10";
 
 	return {
@@ -79,6 +88,7 @@ export function loadSettings(): PowerbarSettings {
 			.filter(Boolean),
 		separator,
 		placement: placement === "aboveEditor" ? "aboveEditor" : "belowEditor",
+		barStyle: barStyle === "continuous" ? "continuous" : "blocks",
 		barWidth: Math.max(4, Math.min(24, Number.parseInt(barWidthStr, 10) || 10)),
 	};
 }

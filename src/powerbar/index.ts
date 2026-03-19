@@ -18,6 +18,7 @@ interface PowerbarUpdatePayload {
 	icon?: string;
 	color?: string;
 	bar?: number;
+	barSegments?: number;
 }
 
 interface SegmentRegistration {
@@ -77,6 +78,7 @@ export default function createExtension(pi: ExtensionAPI): void {
 				icon: payload.icon,
 				color: payload.color,
 				bar: payload.bar,
+				barSegments: payload.barSegments,
 			});
 		}
 

@@ -2,8 +2,9 @@
  * Rendering logic for the powerbar.
  *
  * Builds a single line with left-aligned and right-aligned segments,
- * joined by themed separators. Supports inline progress bars using
- * block characters (█ + partials ▏▎▍▌▋▊▉).
+ * joined by themed separators. Supports two progress bar styles:
+ * continuous (█ + partial-width glyphs ▏▎▍▌▋▊▉) and blocks
+ * (discrete partial-height glyphs ▁▂▃▄▅▆▇█ with dim background).
  */
 
 import type { Theme, ThemeColor } from "@mariozechner/pi-coding-agent";
@@ -20,6 +21,8 @@ export interface Segment {
 	color?: string;
 	/** If set, renders a progress bar. Value is 0–100. */
 	bar?: number;
+	/** Hint for how many discrete blocks to use in blocks mode. Falls back to barWidth setting. */
+	barSegments?: number;
 }
 
 /**
@@ -54,6 +57,38 @@ function renderProgressBar(percent: number, width: number, theme: Theme, color: 
 	return theme.fg(themeColor, filledStr + partial) + emptyStr;
 }
 
+/** Convert a foreground ANSI escape to background by replacing SGR 38 with 48. */
+function fgToBgAnsi(fgAnsi: string): string {
+	return fgAnsi.replace("\x1b[38;", "\x1b[48;");
+}
+
+/**
+ * Render a bar of discrete block characters with a dim background track.
+ *
+ * Splits the 0–100 percent range evenly across `segments` blocks and
+ * computes a fill level (0–8) per block. The dim theme color provides
+ * the background "track"; partial block glyphs fill from the bottom
+ * in the segment color.
+ */
+function renderBlocksBar(percent: number, segments: number, theme: Theme, color: string): string {
+	const glyphs = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
+	const dimBg = fgToBgAnsi(theme.getFgAnsi("dim"));
+	const fgColor = theme.getFgAnsi((color || "muted") as ThemeColor);
+	const reset = "\x1b[39m\x1b[49m";
+	const clamped = Math.max(0, Math.min(100, percent));
+	const filledFloat = (clamped / 100) * segments;
+
+	const result: string[] = [];
+	for (let i = 0; i < segments; i++) {
+		const blockFill = Math.max(0, Math.min(1, filledFloat - i));
+		const level = Math.round(blockFill * 8);
+		const glyph = glyphs[level];
+		result.push(level > 0 ? `${dimBg}${fgColor}${glyph}${reset}` : `${dimBg}${glyph}${reset}`);
+	}
+
+	return result.join(" ");
+}
+
 /**
  * Render a single segment.
  *
@@ -72,7 +107,13 @@ function renderSegmentText(segment: Segment, settings: PowerbarSettings, theme: 
 	}
 
 	if (segment.bar !== undefined) {
-		parts.push(renderProgressBar(segment.bar, settings.barWidth, theme, segment.color || "muted"));
+		const color = segment.color || "muted";
+		if (settings.barStyle === "blocks") {
+			const blockCount = segment.barSegments ?? settings.barWidth;
+			parts.push(renderBlocksBar(segment.bar, blockCount, theme, color));
+		} else {
+			parts.push(renderProgressBar(segment.bar, settings.barWidth, theme, color));
+		}
 	}
 
 	if (segment.suffix) {
