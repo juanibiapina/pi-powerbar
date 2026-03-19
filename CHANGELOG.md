@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-19
+
 ### Added
 
 - Bar style setting: choose between `continuous` (left-to-right fill) and `blocks` (discrete partial-height characters with dim background track), default `blocks`
