@@ -17,7 +17,7 @@ function getColor(pct: number): string {
 	return "muted";
 }
 
-function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | undefined): void {
+function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | undefined, barSegments: number): void {
 	if (!window) {
 		pi.events.emit("powerbar:update", { id: segmentId, text: undefined });
 		return;
@@ -36,6 +36,7 @@ function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | un
 		text: textParts.join(" "),
 		suffix: `${pct}%`,
 		bar: pct,
+		barSegments,
 		color: getColor(pct),
 	});
 }
@@ -47,8 +48,8 @@ function emitUsage(pi: ExtensionAPI, usage: UsageSnapshot | undefined): void {
 		return;
 	}
 
-	emitWindow(pi, "sub-hourly", usage.windows[0]);
-	emitWindow(pi, "sub-weekly", usage.windows[1]);
+	emitWindow(pi, "sub-hourly", usage.windows[0], 5);
+	emitWindow(pi, "sub-weekly", usage.windows[1], 7);
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
