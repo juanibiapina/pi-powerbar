@@ -26,10 +26,9 @@ export interface Segment {
 }
 
 /**
- * Render a progress bar using full-height block characters.
+ * Render a continuous progress bar using full-width block characters.
  *
- * █ for filled blocks, ▏▎▍▌▋▊▉ for partial, space for empty.
- * Matches the pi-sub visual style.
+ * █ for filled columns, ▏▎▍▌▋▊▉ for the partial column, space for empty.
  */
 function renderProgressBar(percent: number, width: number, theme: Theme, color: string): string {
 	const clamped = Math.max(0, Math.min(100, percent));

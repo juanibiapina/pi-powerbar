@@ -40,6 +40,19 @@ pi.events.emit("powerbar:update", {
 });
 ```
 
+Segments can include a progress bar with an optional block count hint:
+
+```typescript
+pi.events.emit("powerbar:update", {
+  id: "context-usage",
+  text: "",
+  suffix: "30%",
+  bar: 30,              // progress value 0–100
+  barSegments: 10,      // optional: number of discrete blocks in blocks mode
+  color: "muted",
+});
+```
+
 To remove a segment:
 
 ```typescript
@@ -71,6 +84,7 @@ Settings are managed through [`pi-extension-settings`](https://github.com/juanib
 | **Right segments** | Segments shown on the right side (ordered multi-select menu) | `provider,model,sub-hourly,sub-weekly` |
 | **Separator** | String drawn between segments on the same side | ` │ ` |
 | **Placement** | Where the powerbar appears (`belowEditor` or `aboveEditor`) | `belowEditor` |
+| **Bar style** | Visual style of progress bars (`continuous` or `blocks`) | `blocks` |
 | **Bar width** | Width of progress bars in characters (4–24) | `10` |
 
 The left and right segment settings open an interactive menu where you can toggle segments on/off and reorder them with Shift+↑/↓. All segments registered via `powerbar:register-segment` appear as options. Segments not listed in either side are ignored.

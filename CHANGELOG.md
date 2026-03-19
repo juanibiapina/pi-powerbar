@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Bar style setting: choose between `continuous` (left-to-right fill) and `blocks` (discrete partial-height characters with dim background track), default `blocks`
+- `barSegments` hint in update payload: producers can suggest how many discrete blocks to show (e.g. context-usage uses one block per 100k tokens, sub-hourly uses 5, sub-weekly uses 7)
+
 ## [0.6.1] - 2026-03-07
 
 ### Fixed
