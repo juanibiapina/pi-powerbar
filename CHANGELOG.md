@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-03-23
+
+### Changed
+
+- Updated `@mariozechner/pi-coding-agent` dev dependency to ^0.62.0
+- Updated `@juanibiapina/pi-extension-settings` dependency to ^0.6.0
+
 ## [0.7.0] - 2026-03-19
 
 ### Added
