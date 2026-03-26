@@ -46,11 +46,11 @@
     "@marckrenn/pi-sub-core": "^1.3.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.1",
+    "@biomejs/biome": "2.4.9",
     "@juanibiapina/pi-extension-settings": "^0.6.0",
     "@marckrenn/pi-sub-shared": "^1.3.0",
     "@mariozechner/pi-coding-agent": "^0.62.0",
     "@types/node": "^25.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }
