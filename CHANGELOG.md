@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-06
+
+### Changed
+
+- Updated `@mariozechner/pi-coding-agent` dev dependency to ^0.65.2
+- Updated `@juanibiapina/pi-extension-settings` dev dependency to ^0.6.1
+- Removed all `session_switch` event handlers (event removed from pi API)
+
 ## [0.7.1] - 2026-03-23
 
 ### Changed
