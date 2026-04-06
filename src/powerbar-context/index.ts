@@ -43,7 +43,6 @@ export default function createExtension(pi: ExtensionAPI): void {
 
 	// Reset on new/switched session
 	pi.on("session_start", async () => resetContextUsage(pi));
-	pi.on("session_switch", async () => resetContextUsage(pi));
 
 	// Update frequently during agent work
 	pi.on("turn_start", async (_event, ctx) => emitContextUsage(pi, ctx));

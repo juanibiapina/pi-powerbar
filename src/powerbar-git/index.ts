@@ -46,10 +46,6 @@ export default function createExtension(pi: ExtensionAPI): void {
 		emitBranch(pi, ctx);
 	});
 
-	pi.on("session_switch", async (_event, ctx) => {
-		emitBranch(pi, ctx);
-	});
-
 	// Refresh after bash commands (user may have changed branches)
 	pi.on("tool_result", async (event, ctx) => {
 		if (event.toolName === "bash") {

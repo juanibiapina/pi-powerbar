@@ -34,10 +34,6 @@ export default function createExtension(pi: ExtensionAPI): void {
 		emitModel(pi, ctx);
 	});
 
-	pi.on("session_switch", async (_event, ctx) => {
-		emitModel(pi, ctx);
-	});
-
 	pi.on("model_select", async (_event, ctx) => {
 		emitModel(pi, ctx);
 	});

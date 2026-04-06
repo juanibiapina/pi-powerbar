@@ -102,13 +102,6 @@ export default function createExtension(pi: ExtensionAPI): void {
 		refresh();
 	});
 
-	pi.on("session_switch", async (_event, ctx) => {
-		settings = loadSettings();
-		currentCtx = ctx;
-		hideFooter(ctx);
-		refresh();
-	});
-
 	pi.on("session_shutdown", async (_event, ctx) => {
 		if (ctx.hasUI) {
 			ctx.ui.setWidget("powerbar", undefined);
