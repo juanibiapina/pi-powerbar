@@ -1,0 +1,129 @@
+name: Dependabot auto-merge
+
+on:
+  workflow_dispatch:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  check_run:
+    types:
+      - completed
+  check_suite:
+    types:
+      - completed
+  status:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge Dependabot PRs when checks pass
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const okConclusions = new Set(['success', 'neutral', 'skipped'])
+
+            async function prsForSha(ref) {
+              const res = await github.request('GET /repos/{owner}/{repo}/commits/{ref}/pulls', {
+                owner,
+                repo,
+                ref,
+                mediaType: { previews: ['groot'] },
+              })
+              return res.data
+            }
+
+            async function listCandidatePRs() {
+              if (context.eventName === 'workflow_dispatch') {
+                const res = await github.rest.pulls.list({ owner, repo, state: 'open', per_page: 100 })
+                return res.data.filter((pr) => pr.user?.login === 'dependabot[bot]')
+              }
+
+              if (context.eventName === 'pull_request_target') {
+                const pr = context.payload.pull_request
+                if (pr?.state === 'open' && pr.user?.login === 'dependabot[bot]') {
+                  return [pr]
+                }
+                return []
+              }
+
+              const ref = context.payload.check_run?.head_sha || context.payload.check_suite?.head_sha || context.payload.sha
+              if (!ref) {
+                return []
+              }
+
+              const prs = await prsForSha(ref)
+              return prs.filter((pr) => pr.state === 'open' && pr.user?.login === 'dependabot[bot]')
+            }
+
+            async function checksPassed(ref) {
+              const [statusRes, checkRunsRes] = await Promise.all([
+                github.rest.repos.getCombinedStatusForRef({ owner, repo, ref }),
+                github.rest.checks.listForRef({ owner, repo, ref, per_page: 100 }),
+              ])
+
+              const statuses = statusRes.data.statuses || []
+              const checkRuns = checkRunsRes.data.check_runs || []
+
+              if (statuses.some((status) => status.state !== 'success')) {
+                return false
+              }
+
+              for (const run of checkRuns) {
+                if (run.status !== 'completed') {
+                  return false
+                }
+                if (!okConclusions.has(run.conclusion)) {
+                  return false
+                }
+              }
+
+              return true
+            }
+
+            const seen = new Set()
+            const candidates = await listCandidatePRs()
+
+            for (const candidate of candidates) {
+              if (seen.has(candidate.number)) {
+                continue
+              }
+              seen.add(candidate.number)
+
+              const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: candidate.number })
+
+              if (pr.state !== 'open' || pr.user?.login !== 'dependabot[bot]' || pr.draft) {
+                core.info(`Skipping #${pr.number}`)
+                continue
+              }
+
+              const ready = await checksPassed(pr.head.sha)
+              if (!ready) {
+                core.info(`Checks not green for #${pr.number}`)
+                continue
+              }
+
+              try {
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  merge_method: 'squash',
+                })
+                core.info(`Merged #${pr.number}`)
+              } catch (error) {
+                core.warning(`Could not merge #${pr.number}: ${error.message}`)
+              }
+            }
