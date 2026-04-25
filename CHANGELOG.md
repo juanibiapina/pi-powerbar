@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped dependencies to latest: `@marckrenn/pi-sub-core` ^1.5.0, `@marckrenn/pi-sub-shared` ^1.5.0, `@mariozechner/pi-coding-agent` ^0.70.2, `@biomejs/biome` 2.4.13, `@types/node` ^25.6.0, `typescript` ^6.0.3.
+- Powerbar core no longer redraws when a `powerbar:update` carries a payload identical to the current segment state, cutting widget churn from chatty producers.
+
+### Fixed
+
+- Subscription producer no longer reacts to `sub-core:update-all`. That event filters provider entries by cache TTL, so the current provider can be missing whenever its `fetchedAt` drifts past the refresh interval (e.g. during anthropic 429s, see [marckrenn/pi-sub#58](https://github.com/marckrenn/pi-sub/issues/58)). The previous code interpreted that as "no usage" and cleared `sub-hourly` / `sub-weekly`, producing the disappear/reappear flicker. `sub-core:update-current` is authoritative for the current provider in every case, including cross-instance cache writes, so we now rely on it exclusively.
+
 ## [0.9.0] - 2026-04-22
 
 ### Fixed

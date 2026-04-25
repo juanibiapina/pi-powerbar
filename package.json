@@ -9,6 +9,7 @@
     "clean": "rm -rf dist",
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "npm run build && node --test test/*.test.js",
     "check": "biome check --write --error-on-warnings . && tsc --noEmit",
     "prepublishOnly": "npm run clean && npm run build && npm run check"
   },

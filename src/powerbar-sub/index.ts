@@ -3,12 +3,19 @@
  *
  * Shows subscription usage from pi-sub-core.
  * Sub-core is loaded by pi as a sibling extension (declared in package.json pi.extensions).
- * This producer just listens to sub-core events and emits powerbar segments.
+ *
+ * We listen only to `sub-core:ready` and `sub-core:update-current`. We intentionally
+ * skip `sub-core:update-all`: its entries list filters providers by cache TTL, so the
+ * current provider can be missing whenever its `fetchedAt` drifts past the refresh
+ * interval (e.g. during anthropic 429s, see https://github.com/marckrenn/pi-sub/issues/58).
+ * `update-current` is authoritative for the current provider's usage in every case,
+ * including when other pi instances refresh the shared cache (sub-core re-emits
+ * `update-current` from its `onCacheUpdate` listener).
  *
  * Segment IDs: "sub-hourly", "sub-weekly"
  */
 
-import type { RateWindow, SubCoreAllState, SubCoreState, UsageSnapshot } from "@marckrenn/pi-sub-shared";
+import type { RateWindow, SubCoreState } from "@marckrenn/pi-sub-shared";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
 function getColor(pct: number): string {
@@ -41,7 +48,8 @@ function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | un
 	});
 }
 
-function emitUsage(pi: ExtensionAPI, usage: UsageSnapshot | undefined): void {
+function emitUsage(pi: ExtensionAPI, state: SubCoreState | undefined): void {
+	const usage = state?.usage;
 	if (!usage || usage.windows.length === 0) {
 		pi.events.emit("powerbar:update", { id: "sub-hourly", text: undefined });
 		pi.events.emit("powerbar:update", { id: "sub-weekly", text: undefined });
@@ -57,22 +65,10 @@ export default function createExtension(pi: ExtensionAPI): void {
 	pi.events.emit("powerbar:register-segment", { id: "sub-weekly", label: "Sub Weekly" });
 
 	pi.events.on("sub-core:ready", (payload: unknown) => {
-		const data = payload as { state?: SubCoreState };
-		emitUsage(pi, data.state?.usage);
+		emitUsage(pi, (payload as { state?: SubCoreState }).state);
 	});
 
 	pi.events.on("sub-core:update-current", (payload: unknown) => {
-		const data = payload as { state?: SubCoreState };
-		emitUsage(pi, data.state?.usage);
-	});
-
-	pi.events.on("sub-core:update-all", (payload: unknown) => {
-		const data = payload as { state?: SubCoreAllState };
-		// Find the entry matching the current provider, or fall back to first entry
-		const currentProvider = data.state?.provider;
-		const entry = currentProvider
-			? data.state?.entries?.find((e) => e.provider === currentProvider)
-			: data.state?.entries?.[0];
-		emitUsage(pi, entry?.usage);
+		emitUsage(pi, (payload as { state?: SubCoreState }).state);
 	});
 }

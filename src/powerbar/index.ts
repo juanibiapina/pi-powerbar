@@ -26,6 +26,17 @@ interface SegmentRegistration {
 	label: string;
 }
 
+function segmentEquals(left: Segment | undefined, right: Segment): boolean {
+	return (
+		left?.text === right.text &&
+		left.suffix === right.suffix &&
+		left.icon === right.icon &&
+		left.color === right.color &&
+		left.bar === right.bar &&
+		left.barSegments === right.barSegments
+	);
+}
+
 export default function createExtension(pi: ExtensionAPI): void {
 	const segments: Map<string, Segment> = new Map();
 	const segmentCatalog: Map<string, OrderedListOption> = new Map();
@@ -69,9 +80,10 @@ export default function createExtension(pi: ExtensionAPI): void {
 		if (!payload?.id) return;
 
 		if (!payload.text && payload.bar === undefined) {
-			segments.delete(payload.id);
+			const changed = segments.delete(payload.id);
+			if (!changed) return;
 		} else {
-			segments.set(payload.id, {
+			const nextSegment: Segment = {
 				id: payload.id,
 				text: payload.text ?? "",
 				suffix: payload.suffix,
@@ -79,7 +91,9 @@ export default function createExtension(pi: ExtensionAPI): void {
 				color: payload.color,
 				bar: payload.bar,
 				barSegments: payload.barSegments,
-			});
+			};
+			if (segmentEquals(segments.get(payload.id), nextSegment)) return;
+			segments.set(payload.id, nextSegment);
 		}
 
 		refresh();
