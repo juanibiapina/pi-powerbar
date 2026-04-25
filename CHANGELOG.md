@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-04-25
+
 ### Changed
 
 - Bumped dependencies to latest: `@marckrenn/pi-sub-core` ^1.5.0, `@marckrenn/pi-sub-shared` ^1.5.0, `@mariozechner/pi-coding-agent` ^0.70.2, `@biomejs/biome` 2.4.13, `@types/node` ^25.6.0, `typescript` ^6.0.3.
