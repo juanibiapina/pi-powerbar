@@ -48,9 +48,9 @@
     "@marckrenn/pi-sub-core": "^1.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.13",
+    "@biomejs/biome": "2.4.15",
     "@marckrenn/pi-sub-shared": "^1.5.0",
-    "@mariozechner/pi-coding-agent": "^0.70.2",
+    "@mariozechner/pi-coding-agent": "^0.73.1",
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3"
   }
