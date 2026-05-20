@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Replaced `@marckrenn/pi-sub-core` + `@marckrenn/pi-sub-shared` with `@juanibiapina/pi-usage`, a simplified fork that keeps all providers but fixes two bugs:
+  - **Bedrock false positive**: detection no longer falls back to model tokens when the provider field is explicitly set, preventing AWS Bedrock models from showing Anthropic subscription usage
+  - **429 flicker**: `turn_end`/`turn_start` no longer bypass cache TTL; errors write a shared backoff file so all pi instances wait together instead of hammering the API
+- Subscription producer now listens to `usage-core:*` events instead of `sub-core:*`
+
 ## [0.11.2] - 2026-05-20
 
 ### Fixed

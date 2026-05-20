@@ -23,10 +23,10 @@ function createPi() {
 	return { pi, emitted };
 }
 
-function usage(provider, hourly = 1, weekly = 9) {
+function usage(hourly = 1, weekly = 9) {
 	return {
-		provider,
-		displayName: `${provider} plan`,
+		provider: "anthropic",
+		displayName: "Claude Plan",
 		windows: [
 			{ label: "5h", usedPercent: hourly, resetDescription: "1h" },
 			{ label: "Week", usedPercent: weekly, resetDescription: "2d" },
@@ -45,12 +45,12 @@ function hasDelete(update) {
 	return update.payload?.text === undefined && update.payload?.bar === undefined;
 }
 
-test("emits segments for the current provider on update-current", () => {
+test("emits segments when provider detected and usage present", () => {
 	const { pi, emitted } = createPi();
 	createExtension(pi);
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:update-current", { state: { provider: "anthropic", usage: usage("anthropic", 7, 14) } });
+	pi.events.emit("usage-core:update-current", { state: { provider: "anthropic", usage: usage(7, 14) } });
 
 	assert.deepEqual(
 		powerbarSubUpdates(emitted).map((u) => [u.payload.id, u.payload.text, u.payload.suffix, u.payload.bar]),
@@ -61,50 +61,42 @@ test("emits segments for the current provider on update-current", () => {
 	);
 });
 
-test("ignores sub-core:update-all entirely (TTL filter would lie about the current provider)", () => {
+test("clears segments when no provider (e.g. Bedrock model)", () => {
 	const { pi, emitted } = createPi();
 	createExtension(pi);
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:update-current", { state: { provider: "anthropic", usage: usage("anthropic", 5, 12) } });
+	// First show some usage.
+	pi.events.emit("usage-core:update-current", { state: { provider: "anthropic", usage: usage(5, 12) } });
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:update-all", {
-		state: { provider: "anthropic", entries: [{ provider: "codex", usage: usage("codex", 99, 99) }] },
-	});
-	pi.events.emit("sub-core:update-all", { state: { provider: "anthropic", entries: [] } });
-	pi.events.emit("sub-core:update-all", {
-		state: { provider: "anthropic", entries: [{ provider: "anthropic", usage: usage("anthropic", 50, 60) }] },
-	});
-
-	assert.deepEqual(powerbarSubUpdates(emitted), []);
-});
-
-test("clears segments when update-current carries no usage", () => {
-	const { pi, emitted } = createPi();
-	createExtension(pi);
-	emitted.length = 0;
-
-	pi.events.emit("sub-core:update-current", { state: { provider: "anthropic", usage: usage("anthropic", 5, 12) } });
-	emitted.length = 0;
-
-	pi.events.emit("sub-core:update-current", { state: { provider: "anthropic" } });
+	// Switch to non-detected model.
+	pi.events.emit("usage-core:update-current", { state: {} });
 
 	const updates = powerbarSubUpdates(emitted);
 	assert.equal(updates.length, 2);
 	assert.equal(updates.every(hasDelete), true);
 });
 
-test("clears segments when update-current usage has no windows", () => {
+test("clears segments when provider detected but no usage", () => {
 	const { pi, emitted } = createPi();
 	createExtension(pi);
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:update-current", { state: { provider: "anthropic", usage: usage("anthropic", 5, 12) } });
+	pi.events.emit("usage-core:update-current", { state: { provider: "anthropic" } });
+
+	const updates = powerbarSubUpdates(emitted);
+	assert.equal(updates.length, 2);
+	assert.equal(updates.every(hasDelete), true);
+});
+
+test("clears segments when usage has empty windows", () => {
+	const { pi, emitted } = createPi();
+	createExtension(pi);
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:update-current", {
-		state: { provider: "anthropic", usage: { provider: "anthropic", windows: [] } },
+	pi.events.emit("usage-core:update-current", {
+		state: { provider: "anthropic", usage: { provider: "anthropic", displayName: "Claude Plan", windows: [] } },
 	});
 
 	const updates = powerbarSubUpdates(emitted);
@@ -112,18 +104,18 @@ test("clears segments when update-current usage has no windows", () => {
 	assert.equal(updates.every(hasDelete), true);
 });
 
-test("sub-core:ready with empty state clears segments; later update-current re-fills", () => {
+test("ready with empty state clears segments; later update re-fills", () => {
 	const { pi, emitted } = createPi();
 	createExtension(pi);
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:ready", { state: {} });
+	pi.events.emit("usage-core:ready", { state: {} });
 	const readyUpdates = powerbarSubUpdates(emitted);
 	assert.equal(readyUpdates.length, 2);
 	assert.equal(readyUpdates.every(hasDelete), true);
 	emitted.length = 0;
 
-	pi.events.emit("sub-core:update-current", { state: { provider: "anthropic", usage: usage("anthropic", 7, 14) } });
+	pi.events.emit("usage-core:update-current", { state: { provider: "anthropic", usage: usage(7, 14) } });
 	assert.deepEqual(
 		powerbarSubUpdates(emitted).map((u) => [u.payload.id, u.payload.text, u.payload.suffix]),
 		[

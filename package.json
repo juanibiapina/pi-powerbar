@@ -21,7 +21,7 @@
   "pi": {
     "extensions": [
       "./src",
-      "node_modules/@marckrenn/pi-sub-core/index.ts"
+      "node_modules/@juanibiapina/pi-usage/index.ts"
     ]
   },
   "author": "Juan Ibiapina",
@@ -35,15 +35,15 @@
   },
   "dependencies": {
     "@juanibiapina/pi-extension-settings": "^0.6.1",
-    "@marckrenn/pi-sub-core": "^1.5.0"
+    "@juanibiapina/pi-usage": "^0.1.0"
   },
   "bundleDependencies": [
-    "@marckrenn/pi-sub-core"
+    "@juanibiapina/pi-usage"
   ],
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
     "@earendil-works/pi-coding-agent": "^0.75.3",
-    "@marckrenn/pi-sub-shared": "^1.5.0",
+    "@earendil-works/pi-tui": "^0.75.4",
     "@types/node": "^25.9.1",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"

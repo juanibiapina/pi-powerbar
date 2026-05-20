@@ -1,22 +1,30 @@
 /**
  * Powerbar Sub Producer
  *
- * Shows subscription usage from pi-sub-core.
- * Sub-core is loaded by pi as a sibling extension (declared in package.json pi.extensions).
+ * Shows subscription usage from pi-usage.
+ * pi-usage is loaded by pi as a sibling extension (declared in package.json pi.extensions).
  *
- * We listen only to `sub-core:ready` and `sub-core:update-current`. We intentionally
- * skip `sub-core:update-all`: its entries list filters providers by cache TTL, so the
- * current provider can be missing whenever its `fetchedAt` drifts past the refresh
- * interval (e.g. during anthropic 429s, see https://github.com/marckrenn/pi-sub/issues/58).
- * `update-current` is authoritative for the current provider's usage in every case,
- * including when other pi instances refresh the shared cache (sub-core re-emits
- * `update-current` from its `onCacheUpdate` listener).
+ * We listen to `usage-core:ready` and `usage-core:update-current`.
+ * The state includes a `provider` field — when absent (e.g. Bedrock model),
+ * we clear the segments.
  *
  * Segment IDs: "sub-hourly", "sub-weekly"
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import type { RateWindow, SubCoreState } from "@marckrenn/pi-sub-shared";
+
+interface RateWindow {
+	label: string;
+	usedPercent: number;
+	resetDescription?: string;
+}
+
+interface UsageCoreState {
+	provider?: string;
+	usage?: {
+		windows: RateWindow[];
+	};
+}
 
 function getColor(pct: number): string {
 	if (pct > 80) return "error";
@@ -48,11 +56,20 @@ function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | un
 	});
 }
 
-function emitUsage(pi: ExtensionAPI, state: SubCoreState | undefined): void {
-	const usage = state?.usage;
+function clearSegments(pi: ExtensionAPI): void {
+	pi.events.emit("powerbar:update", { id: "sub-hourly", text: undefined });
+	pi.events.emit("powerbar:update", { id: "sub-weekly", text: undefined });
+}
+
+function emitUsage(pi: ExtensionAPI, state: UsageCoreState | undefined): void {
+	if (!state?.provider) {
+		clearSegments(pi);
+		return;
+	}
+
+	const usage = state.usage;
 	if (!usage || usage.windows.length === 0) {
-		pi.events.emit("powerbar:update", { id: "sub-hourly", text: undefined });
-		pi.events.emit("powerbar:update", { id: "sub-weekly", text: undefined });
+		clearSegments(pi);
 		return;
 	}
 
@@ -64,11 +81,11 @@ export default function createExtension(pi: ExtensionAPI): void {
 	pi.events.emit("powerbar:register-segment", { id: "sub-hourly", label: "Sub Hourly" });
 	pi.events.emit("powerbar:register-segment", { id: "sub-weekly", label: "Sub Weekly" });
 
-	pi.events.on("sub-core:ready", (payload: unknown) => {
-		emitUsage(pi, (payload as { state?: SubCoreState }).state);
+	pi.events.on("usage-core:ready", (payload: unknown) => {
+		emitUsage(pi, (payload as { state?: UsageCoreState }).state);
 	});
 
-	pi.events.on("sub-core:update-current", (payload: unknown) => {
-		emitUsage(pi, (payload as { state?: SubCoreState }).state);
+	pi.events.on("usage-core:update-current", (payload: unknown) => {
+		emitUsage(pi, (payload as { state?: UsageCoreState }).state);
 	});
 }
