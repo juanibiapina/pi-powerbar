@@ -1,6 +1,6 @@
 {
   "name": "@juanibiapina/pi-powerbar",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Pi extension that renders a persistent powerline status bar with left/right segments updated via events",
   "type": "module",
   "scripts": {
@@ -20,7 +20,8 @@
   ],
   "pi": {
     "extensions": [
-      "./src"
+      "./src",
+      "node_modules/@marckrenn/pi-sub-core/index.ts"
     ]
   },
   "author": "Juan Ibiapina",
@@ -36,6 +37,9 @@
     "@juanibiapina/pi-extension-settings": "^0.6.1",
     "@marckrenn/pi-sub-core": "^1.5.0"
   },
+  "bundleDependencies": [
+    "@marckrenn/pi-sub-core"
+  ],
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
     "@earendil-works/pi-coding-agent": "^0.75.3",

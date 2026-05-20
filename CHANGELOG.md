@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.1] - 2026-05-20
+## [0.11.2] - 2026-05-20
 
 ### Fixed
 
-- Removed `node_modules/@marckrenn/pi-sub-core/index.ts` from `pi.extensions` — npm hoisting breaks the relative path; pi-sub-core should be installed as a separate package instead
+- Added `bundleDependencies` for `@marckrenn/pi-sub-core` to prevent npm hoisting, which broke the relative `node_modules/` path in `pi.extensions`
 
 ## [0.11.0] - 2026-05-20
 
