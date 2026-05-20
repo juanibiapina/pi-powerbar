@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Removed tsc build step: pi now loads TypeScript source directly via jiti
+- Changed `pi.extensions` entry point from `./dist` to `./src`
+- Removed `peerDependencies` (`@earendil-works/pi-coding-agent`, `@earendil-works/pi-tui`) — pi provides these at runtime
+- Removed `main` and `types` fields (no longer shipping compiled JS)
+- Removed `build`, `dev`, `clean`, and `prepublishOnly` scripts
+- Changed published `files` from `dist/**/*` to `src/**/*`
 ## [0.10.0] - 2026-05-20
 
 ### Changed

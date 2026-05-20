@@ -3,18 +3,12 @@
   "version": "0.10.0",
   "description": "Pi extension that renders a persistent powerline status bar with left/right segments updated via events",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "./dist/index.d.ts",
   "scripts": {
-    "clean": "rm -rf dist",
-    "build": "tsc -p tsconfig.build.json",
-    "dev": "tsc -p tsconfig.build.json --watch",
-    "test": "npm run build && node --test test/*.test.js",
-    "check": "biome check --write --error-on-warnings . && tsc --noEmit",
-    "prepublishOnly": "npm run clean && npm run build && npm run check"
+    "test": "node --test test/*.test.js",
+    "check": "biome check --write --error-on-warnings . && tsc --noEmit"
   },
   "files": [
-    "dist/**/*",
+    "src/**/*",
     "README.md"
   ],
   "keywords": [
@@ -26,7 +20,7 @@
   ],
   "pi": {
     "extensions": [
-      "./dist",
+      "./src",
       "node_modules/@marckrenn/pi-sub-core/index.ts"
     ]
   },
@@ -38,10 +32,6 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "*",
-    "@earendil-works/pi-tui": "*"
   },
   "dependencies": {
     "@juanibiapina/pi-extension-settings": "^0.6.1",
