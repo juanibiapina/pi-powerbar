@@ -2,9 +2,9 @@
  * Settings for the powerbar via pi-extension-settings.
  */
 
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { OrderedListOption, SettingDefinition } from "@juanibiapina/pi-extension-settings";
 import { getSetting } from "@juanibiapina/pi-extension-settings";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export const EXTENSION_NAME = "powerbar";
 

@@ -1,10 +1,10 @@
 {
   "name": "@juanibiapina/pi-powerbar",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Pi extension that renders a persistent powerline status bar with left/right segments updated via events",
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.js",
+    "test": "node --test --import tsx test/*.test.js",
     "check": "biome check --write --error-on-warnings . && tsc --noEmit"
   },
   "files": [
@@ -39,9 +39,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
-    "@marckrenn/pi-sub-shared": "^1.5.0",
     "@earendil-works/pi-coding-agent": "^0.75.3",
+    "@marckrenn/pi-sub-shared": "^1.5.0",
     "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   }
 }

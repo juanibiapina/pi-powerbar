@@ -19,8 +19,7 @@ git push origin main --tags
 
 The workflow automatically:
 - Installs dependencies (`npm ci`)
-- Publishes to npm (`npm publish --access public`)
-- `prepublishOnly` script handles `clean && build && check`
+- Publishes TypeScript source to npm (`npm publish --access public`)
 
 After pushing the tag, the coding agent should:
 1. Wait for the GitHub Actions workflow to complete: `gh run watch`

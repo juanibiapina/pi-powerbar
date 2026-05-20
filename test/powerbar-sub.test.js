@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import createExtension from "../dist/powerbar-sub/index.js";
+import createExtension from "../src/powerbar-sub/index.ts";
 
 function createPi() {
 	const listeners = new Map();

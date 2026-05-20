@@ -15,8 +15,8 @@
  * Segment IDs: "sub-hourly", "sub-weekly"
  */
 
-import type { RateWindow, SubCoreState } from "@marckrenn/pi-sub-shared";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { RateWindow, SubCoreState } from "@marckrenn/pi-sub-shared";
 
 function getColor(pct: number): string {
 	if (pct > 80) return "error";
