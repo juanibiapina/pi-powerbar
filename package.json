@@ -40,8 +40,8 @@
     "node": ">=20.0.0"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "@mariozechner/pi-tui": "*"
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
   },
   "dependencies": {
     "@juanibiapina/pi-extension-settings": "^0.6.1",
@@ -50,7 +50,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
     "@marckrenn/pi-sub-shared": "^1.5.0",
-    "@mariozechner/pi-coding-agent": "^0.73.1",
+    "@earendil-works/pi-coding-agent": "^0.75.3",
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3"
   }

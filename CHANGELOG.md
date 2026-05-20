@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrated from `@mariozechner/pi-coding-agent` and `@mariozechner/pi-tui` to `@earendil-works/pi-coding-agent` and `@earendil-works/pi-tui`
+- Removed debug logging from all powerbar producers and core
+
 ## [0.9.1] - 2026-04-25
 
 ### Changed

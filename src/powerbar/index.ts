@@ -6,8 +6,8 @@
  */
 
 import type { OrderedListOption } from "@juanibiapina/pi-extension-settings";
-import type { ExtensionAPI, ExtensionUIContext, Theme } from "@mariozechner/pi-coding-agent";
-import type { Component, TUI } from "@mariozechner/pi-tui";
+import type { ExtensionAPI, ExtensionUIContext, Theme } from "@earendil-works/pi-coding-agent";
+import type { Component, TUI } from "@earendil-works/pi-tui";
 import { renderBar, type Segment } from "./render.js";
 import { loadSettings, type PowerbarSettings, registerSettings } from "./settings.js";
 

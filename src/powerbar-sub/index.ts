@@ -16,7 +16,7 @@
  */
 
 import type { RateWindow, SubCoreState } from "@marckrenn/pi-sub-shared";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 function getColor(pct: number): string {
 	if (pct > 80) return "error";

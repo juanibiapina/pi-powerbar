@@ -6,7 +6,7 @@
  * Segment ID: "context-usage"
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const CHUNK_SIZE = 100_000;
 
