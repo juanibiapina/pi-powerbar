@@ -42,8 +42,8 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
-    "@earendil-works/pi-coding-agent": "^0.76.0",
-    "@earendil-works/pi-tui": "^0.76.0",
+    "@earendil-works/pi-coding-agent": "^0.78.0",
+    "@earendil-works/pi-tui": "^0.78.0",
     "@types/node": "^25.9.1",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
