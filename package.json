@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@juanibiapina/pi-extension-settings": "^0.8.0",
-    "@juanibiapina/pi-usage": "^0.1.0"
+    "@juanibiapina/pi-usage": "^0.2.0"
   },
   "bundleDependencies": [
     "@juanibiapina/pi-usage"
