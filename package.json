@@ -41,9 +41,9 @@
     "@juanibiapina/pi-usage"
   ],
   "devDependencies": {
-    "@biomejs/biome": "2.5.4",
-    "@earendil-works/pi-coding-agent": "^0.80.2",
-    "@earendil-works/pi-tui": "^0.80.2",
+    "@biomejs/biome": "2.5.5",
+    "@earendil-works/pi-coding-agent": "^0.81.1",
+    "@earendil-works/pi-tui": "^0.81.1",
     "@types/node": "^26.0.1",
     "tsx": "^4.22.3",
     "typescript": "^7.0.2"
