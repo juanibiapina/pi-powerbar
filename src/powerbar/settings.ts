@@ -69,13 +69,14 @@ export function registerSettings(pi: ExtensionAPI, segmentOptions: OrderedListOp
 	});
 }
 
-export function loadSettings(): PowerbarSettings {
-	const leftStr = getSetting(EXTENSION_NAME, "left", "git-branch,tokens,context-usage") ?? "";
-	const rightStr = getSetting(EXTENSION_NAME, "right", "provider,model,sub-hourly,sub-weekly") ?? "";
-	const separator = getSetting(EXTENSION_NAME, "separator", " │ ") ?? " │ ";
-	const placement = getSetting(EXTENSION_NAME, "placement", "belowEditor") ?? "belowEditor";
-	const barStyle = getSetting(EXTENSION_NAME, "bar-style", "blocks") ?? "blocks";
-	const barWidthStr = getSetting(EXTENSION_NAME, "bar-width", "10") ?? "10";
+export function loadSettings(cwd = process.cwd()): PowerbarSettings {
+	const options = { cwd };
+	const leftStr = getSetting(EXTENSION_NAME, "left", "git-branch,tokens,context-usage", options) ?? "";
+	const rightStr = getSetting(EXTENSION_NAME, "right", "provider,model,sub-hourly,sub-weekly", options) ?? "";
+	const separator = getSetting(EXTENSION_NAME, "separator", " │ ", options) ?? " │ ";
+	const placement = getSetting(EXTENSION_NAME, "placement", "belowEditor", options) ?? "belowEditor";
+	const barStyle = getSetting(EXTENSION_NAME, "bar-style", "blocks", options) ?? "blocks";
+	const barWidthStr = getSetting(EXTENSION_NAME, "bar-width", "10", options) ?? "10";
 
 	return {
 		left: leftStr

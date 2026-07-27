@@ -9,7 +9,10 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 
 function emitProvider(pi: ExtensionAPI, ctx: ExtensionContext): void {
 	const model = ctx.model;
-	if (!model) return;
+	if (!model) {
+		pi.events.emit("powerbar:update", { id: "provider", text: undefined });
+		return;
+	}
 
 	pi.events.emit("powerbar:update", {
 		id: "provider",
