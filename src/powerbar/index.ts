@@ -5,7 +5,15 @@
  * maintains a segment store, and renders a powerline-style widget.
  */
 
-import type { ExtensionAPI, ExtensionUIContext, Theme } from "@earendil-works/pi-coding-agent";
+import { watchFile, unwatchFile } from "node:fs";
+import { join } from "node:path";
+import {
+	CONFIG_DIR_NAME,
+	type ExtensionAPI,
+	type ExtensionUIContext,
+	getAgentDir,
+	type Theme,
+} from "@earendil-works/pi-coding-agent";
 import type { Component, TUI } from "@earendil-works/pi-tui";
 import type { OrderedListOption } from "@juanibiapina/pi-extension-settings";
 import { renderBar, type Segment } from "./render.js";
@@ -42,6 +50,7 @@ export default function createExtension(pi: ExtensionAPI): void {
 	const segmentCatalog: Map<string, OrderedListOption> = new Map();
 	let settings: PowerbarSettings;
 	let currentCtx: { ui: { setWidget: (...args: any[]) => void }; hasUI: boolean } | undefined;
+	let watchedSettingsPaths: string[] = [];
 
 	// Register settings with empty options initially (no segments known yet)
 	registerSettings(pi, []);
@@ -99,6 +108,28 @@ export default function createExtension(pi: ExtensionAPI): void {
 		refresh();
 	});
 
+	function stopWatchingSettings(): void {
+		for (const path of watchedSettingsPaths) unwatchFile(path);
+		watchedSettingsPaths = [];
+	}
+
+	function startWatchingSettings(cwd: string): void {
+		stopWatchingSettings();
+		watchedSettingsPaths = [
+			join(getAgentDir(), "settings-extensions.json"),
+			join(cwd, CONFIG_DIR_NAME, "settings-extensions.json"),
+		];
+
+		for (const path of watchedSettingsPaths) {
+			watchFile(path, { interval: 250, persistent: false }, () => {
+				const nextSettings = loadSettings(cwd);
+				if (JSON.stringify(nextSettings) === JSON.stringify(settings)) return;
+				settings = nextSettings;
+				refresh();
+			});
+		}
+	}
+
 	function hideFooter(ctx: { ui: ExtensionUIContext; hasUI: boolean }): void {
 		if (!ctx.hasUI) return;
 		ctx.ui.setFooter((_tui, _theme, _footerData) => ({
@@ -110,13 +141,15 @@ export default function createExtension(pi: ExtensionAPI): void {
 	}
 
 	pi.on("session_start", async (_event, ctx) => {
-		settings = loadSettings();
+		settings = loadSettings(ctx.cwd);
 		currentCtx = ctx;
 		hideFooter(ctx);
 		refresh();
+		if (ctx.hasUI) startWatchingSettings(ctx.cwd);
 	});
 
 	pi.on("session_shutdown", async (_event, ctx) => {
+		stopWatchingSettings();
 		if (ctx.hasUI) {
 			ctx.ui.setWidget("powerbar", undefined);
 		}

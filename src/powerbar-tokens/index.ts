@@ -23,14 +23,25 @@ function emitTokens(pi: ExtensionAPI, ctx: ExtensionContext): void {
 	let totalCost = 0;
 
 	for (const entry of entries) {
-		if (entry.type === "message" && entry.message.role === "assistant") {
-			totalInput += entry.message.usage.input;
-			totalOutput += entry.message.usage.output;
-			totalCost += entry.message.usage.cost.total;
+		let usage: { input: number; output: number; cost: { total: number } } | undefined;
+		if (
+			entry.type === "message" &&
+			(entry.message.role === "assistant" || entry.message.role === "toolResult")
+		) {
+			usage = entry.message.usage;
+		} else if ((entry.type === "branch_summary" || entry.type === "compaction") && entry.usage) {
+			usage = entry.usage;
+		}
+
+		if (usage) {
+			totalInput += usage.input;
+			totalOutput += usage.output;
+			totalCost += usage.cost.total;
 		}
 	}
 
 	if (totalInput === 0 && totalOutput === 0) {
+		resetTokens(pi);
 		return;
 	}
 
@@ -58,10 +69,12 @@ function resetTokens(pi: ExtensionAPI): void {
 export default function createExtension(pi: ExtensionAPI): void {
 	pi.events.emit("powerbar:register-segment", { id: "tokens", label: "Tokens" });
 
-	// Reset on new/switched session
-	pi.on("session_start", async () => resetTokens(pi));
+	// Restore totals immediately when starting or switching sessions.
+	pi.on("session_start", async (_event, ctx) => emitTokens(pi, ctx));
 
-	// Update frequently during agent work
+	// Update during agent work and after entries are added by session operations.
 	pi.on("tool_result", async (_event, ctx) => emitTokens(pi, ctx));
 	pi.on("turn_end", async (_event, ctx) => emitTokens(pi, ctx));
+	pi.on("session_compact", async (_event, ctx) => emitTokens(pi, ctx));
+	pi.on("session_tree", async (_event, ctx) => emitTokens(pi, ctx));
 }
