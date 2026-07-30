@@ -5,9 +5,9 @@
  * Segment ID: "git-branch"
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { type FSWatcher, readFileSync, statSync, watch } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 function findGitDir(cwd: string): string | undefined {
 	let directory = resolve(cwd);

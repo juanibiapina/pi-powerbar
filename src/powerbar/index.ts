@@ -5,7 +5,7 @@
  * maintains a segment store, and renders a powerline-style widget.
  */
 
-import { watchFile, unwatchFile } from "node:fs";
+import { unwatchFile, watchFile } from "node:fs";
 import { join } from "node:path";
 import {
 	CONFIG_DIR_NAME,
