@@ -20,23 +20,42 @@ function emitTokens(pi: ExtensionAPI, ctx: ExtensionContext): void {
 
 	let totalInput = 0;
 	let totalOutput = 0;
+	let totalCacheRead = 0;
+	let totalCacheWrite = 0;
 	let totalCost = 0;
+	let latestCacheHitRate: number | undefined;
 
 	for (const entry of entries) {
-		let usage: { input: number; output: number; cost: { total: number } } | undefined;
-		if (
-			entry.type === "message" &&
-			(entry.message.role === "assistant" || entry.message.role === "toolResult")
-		) {
+		let usage:
+			| {
+					input: number;
+					output: number;
+					cacheRead?: number;
+					cacheWrite?: number;
+					cost: { total: number };
+			  }
+			| undefined;
+		let isAssistant = false;
+		if (entry.type === "message" && (entry.message.role === "assistant" || entry.message.role === "toolResult")) {
 			usage = entry.message.usage;
+			isAssistant = entry.message.role === "assistant";
 		} else if ((entry.type === "branch_summary" || entry.type === "compaction") && entry.usage) {
 			usage = entry.usage;
 		}
 
 		if (usage) {
+			const cacheRead = usage.cacheRead ?? 0;
+			const cacheWrite = usage.cacheWrite ?? 0;
 			totalInput += usage.input;
 			totalOutput += usage.output;
+			totalCacheRead += cacheRead;
+			totalCacheWrite += cacheWrite;
 			totalCost += usage.cost.total;
+
+			if (isAssistant) {
+				const promptTokens = (usage.input ?? 0) + cacheRead + cacheWrite;
+				latestCacheHitRate = promptTokens > 0 ? (cacheRead / promptTokens) * 100 : undefined;
+			}
 		}
 	}
 
@@ -48,6 +67,15 @@ function emitTokens(pi: ExtensionAPI, ctx: ExtensionContext): void {
 	const parts: string[] = [];
 	parts.push(`↑${formatTokens(totalInput)}`);
 	parts.push(`↓${formatTokens(totalOutput)}`);
+	if (totalCacheRead > 0) {
+		parts.push(`R${formatTokens(totalCacheRead)}`);
+	}
+	if (totalCacheWrite > 0) {
+		parts.push(`W${formatTokens(totalCacheWrite)}`);
+	}
+	if ((totalCacheRead > 0 || totalCacheWrite > 0) && latestCacheHitRate !== undefined) {
+		parts.push(`CH${latestCacheHitRate.toFixed(1)}%`);
+	}
 	if (totalCost > 0) {
 		parts.push(`$${totalCost.toFixed(2)}`);
 	}

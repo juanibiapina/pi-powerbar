@@ -67,7 +67,7 @@ pi.events.emit("powerbar:update", {
 | Segment ID | Description |
 |------------|-------------|
 | `git-branch` | Current git branch (refreshes after bash commands) |
-| `tokens` | Cumulative input/output tokens and session cost (e.g. `↑9 ↓270 $0.11`) |
+| `tokens` | Cumulative input/output tokens, cache reads (`R`) and writes (`W`), the latest assistant request's cache hit rate (`CH`), and session cost (e.g. `↑3.0k ↓400 R20k W2.0k CH80.0% $0.15`). `R` and `W` are session totals; `CH` covers only the most recent request |
 | `context-usage` | Context window usage as a progress bar with percentage |
 | `provider` | Current LLM provider name (e.g. `anthropic`, `openai`) |
 | `model` | Current model name and thinking level |
