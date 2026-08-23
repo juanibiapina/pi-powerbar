@@ -5,8 +5,8 @@
  * maintains a segment store, and renders a powerline-style widget.
  */
 
-import { unwatchFile, watchFile } from "node:fs";
-import { join } from "node:path";
+import { unwatchFile, watch, watchFile } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import {
 	CONFIG_DIR_NAME,
 	type ExtensionAPI,
@@ -50,7 +50,11 @@ export default function createExtension(pi: ExtensionAPI): void {
 	const segmentCatalog: Map<string, OrderedListOption> = new Map();
 	let settings: PowerbarSettings;
 	let currentCtx: { ui: { setWidget: (...args: any[]) => void }; hasUI: boolean } | undefined;
-	let watchedSettingsPaths: string[] = [];
+	let settingsWatchCleanups: (() => void)[] = [];
+	// TUI instance captured when the widget is registered, used to trigger re-renders.
+	let tuiRef: TUI | undefined;
+	// Placement of the currently registered widget (undefined when not registered).
+	let widgetPlacement: "aboveEditor" | "belowEditor" | undefined;
 
 	// Register settings with empty options initially (no segments known yet)
 	registerSettings(pi, []);
@@ -66,21 +70,32 @@ export default function createExtension(pi: ExtensionAPI): void {
 	function refresh(): void {
 		if (!currentCtx?.hasUI) return;
 
-		currentCtx.ui.setWidget(
-			"powerbar",
-			(_tui: TUI, theme: Theme): Component & { dispose?(): void } => {
-				return {
-					render(width: number): string[] {
-						const line = renderBar(segments, settings, theme, width);
-						return [line];
-					},
-					invalidate(): void {
-						// No cached state to clear
-					},
-				};
-			},
-			{ placement: settings.placement },
-		);
+		if (widgetPlacement !== settings.placement) {
+			// Register the widget once (or again when placement changes). The
+			// component closures read the live segments/settings maps, so
+			// subsequent updates only need to trigger a re-render.
+			currentCtx.ui.setWidget(
+				"powerbar",
+				(tui: TUI, theme: Theme): Component & { dispose?(): void } => {
+					tuiRef = tui;
+					return {
+						render(width: number): string[] {
+							const line = renderBar(segments, settings, theme, width);
+							return [line];
+						},
+						invalidate(): void {
+							// No cached state to clear
+						},
+					};
+				},
+				{ placement: settings.placement },
+			);
+			widgetPlacement = settings.placement;
+			return;
+		}
+
+		// Widget is already registered: just trigger a re-render of the live component.
+		tuiRef?.requestRender();
 	}
 
 	// Listen for segment updates from any extension
@@ -109,24 +124,50 @@ export default function createExtension(pi: ExtensionAPI): void {
 	});
 
 	function stopWatchingSettings(): void {
-		for (const path of watchedSettingsPaths) unwatchFile(path);
-		watchedSettingsPaths = [];
+		for (const stop of settingsWatchCleanups) stop();
+		settingsWatchCleanups = [];
+	}
+
+	function reloadSettings(cwd: string): void {
+		const nextSettings = loadSettings(cwd);
+		if (JSON.stringify(nextSettings) === JSON.stringify(settings)) return;
+		settings = nextSettings;
+		refresh();
+	}
+
+	/** Watch one settings file; returns a cleanup function (or undefined when unwatchable). */
+	function watchSettingsFile(path: string, cwd: string): (() => void) | undefined {
+		// Prefer native event-driven watching of the containing directory with a
+		// short debounce (fs.watch is unsupported for files on some platforms).
+		try {
+			const dir = dirname(path);
+			const name = basename(path);
+			let debounceTimer: NodeJS.Timeout | undefined;
+			const watcher = watch(dir, { persistent: false }, (_event, filename) => {
+				if (filename !== name) return;
+				if (debounceTimer) clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => reloadSettings(cwd), 250);
+			});
+			return () => {
+				if (debounceTimer) clearTimeout(debounceTimer);
+				watcher.close();
+			};
+		} catch {
+			// Native watching unavailable (unsupported filesystem): fall back to polling.
+			watchFile(path, { interval: 1000, persistent: false }, () => reloadSettings(cwd));
+			return () => unwatchFile(path);
+		}
 	}
 
 	function startWatchingSettings(cwd: string): void {
 		stopWatchingSettings();
-		watchedSettingsPaths = [
+		const paths = [
 			join(getAgentDir(), "settings-extensions.json"),
 			join(cwd, CONFIG_DIR_NAME, "settings-extensions.json"),
 		];
-
-		for (const path of watchedSettingsPaths) {
-			watchFile(path, { interval: 250, persistent: false }, () => {
-				const nextSettings = loadSettings(cwd);
-				if (JSON.stringify(nextSettings) === JSON.stringify(settings)) return;
-				settings = nextSettings;
-				refresh();
-			});
+		for (const path of paths) {
+			const stop = watchSettingsFile(path, cwd);
+			if (stop) settingsWatchCleanups.push(stop);
 		}
 	}
 
@@ -143,6 +184,9 @@ export default function createExtension(pi: ExtensionAPI): void {
 	pi.on("session_start", async (_event, ctx) => {
 		settings = loadSettings(ctx.cwd);
 		currentCtx = ctx;
+		// The TUI clears extension widgets between sessions, so (re)register.
+		tuiRef = undefined;
+		widgetPlacement = undefined;
 		hideFooter(ctx);
 		refresh();
 		if (ctx.hasUI) startWatchingSettings(ctx.cwd);
@@ -153,6 +197,8 @@ export default function createExtension(pi: ExtensionAPI): void {
 		if (ctx.hasUI) {
 			ctx.ui.setWidget("powerbar", undefined);
 		}
+		tuiRef = undefined;
+		widgetPlacement = undefined;
 		currentCtx = undefined;
 	});
 }
