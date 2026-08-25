@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2026-08-26
+
+### Changed
+
+- Performance: token totals are accumulated incrementally (O(n) instead of O(n²) across a session), settings files are watched with event-driven `fs.watch` + debounce instead of 250ms stat polling, and the TUI widget is registered once per session and re-rendered on update instead of re-registered on every event. No visual or segment changes.
+
 ## [0.14.0] - 2026-07-30
 
 ### Added
