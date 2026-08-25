@@ -98,6 +98,28 @@ npm run build    # compile to dist/
 npm run dev      # watch mode
 ```
 
+### Testing locally against your own pi
+
+To run pi with the powerbar loaded from this checkout instead of your globally
+installed version:
+
+```bash
+gh pr checkout <n>       # optional: test a branch/PR
+scripts/test-local.sh    # launches pi with this repo's powerbar
+```
+
+`scripts/test-local.sh` seeds a throwaway agent config (under `.local/`) from
+your real global config, swaps the powerbar package entry to this repo, and
+launches pi with `PI_CODING_AGENT_DIR` pointing at it. Your global `~/.pi/agent`
+config is never modified. Extra arguments pass through to pi.
+
+It inherits your real `enabledModels` (so every model you use is available) but
+defaults to Claude Sonnet 4.6 at medium thinking on the `anthropic` provider
+(your Claude subscription). Override with `PI_TEST_MODEL`, `PI_TEST_PROVIDER`,
+and `PI_TEST_THINKING`. It symlinks your `auth.json`, model catalog, and the
+`cache/` dir (so `pi-usage` subscription segments populate) and writes a minimal
+`SYSTEM.md` that marks the instance as a throwaway test on a live subscription.
+
 ## License
 
 MIT
