@@ -61,6 +61,56 @@ test("emits segments when provider detected and usage present", () => {
 	);
 });
 
+test("formats reset timestamps at the lifecycle observation time", () => {
+	const { pi, emitted } = createPi();
+	createExtension(pi);
+	emitted.length = 0;
+	const observedAt = Date.parse("2026-09-14T10:00:00.000Z");
+
+	pi.events.emit("usage-core:update-current", {
+		state: {
+			provider: "anthropic",
+			availability: "available",
+			freshness: "fresh",
+			observedAt,
+			usage: {
+				provider: "anthropic",
+				displayName: "Claude Plan",
+				windows: [
+					{
+						label: "5h",
+						usedPercent: 7,
+						resetDescription: "stale",
+						resetAt: "2026-09-14T11:30:00.000Z",
+					},
+				],
+			},
+		},
+	});
+
+	assert.equal(powerbarSubUpdates(emitted)[0]?.payload.text, "5h 1h30m");
+});
+
+test("keeps last-good usage visible when refresh is stale", () => {
+	const { pi, emitted } = createPi();
+	createExtension(pi);
+	emitted.length = 0;
+
+	pi.events.emit("usage-core:update-current", {
+		state: {
+			provider: "anthropic",
+			availability: "available",
+			freshness: "stale",
+			staleReason: "backoff",
+			observedAt: Date.now(),
+			usage: usage(7, 14),
+		},
+	});
+
+	assert.equal(powerbarSubUpdates(emitted).length, 2);
+	assert.equal(powerbarSubUpdates(emitted)[0]?.payload.suffix, "7%");
+});
+
 test("clears segments when no provider (e.g. Bedrock model)", () => {
 	const { pi, emitted } = createPi();
 	createExtension(pi);

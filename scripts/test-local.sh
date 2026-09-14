@@ -73,14 +73,6 @@ for f in auth.json models.json models-store.json; do
 	fi
 done
 
-# Share the cache dir so pi-usage reuses the real subscription-usage cache
-# (cache-<provider>.json). Without it the test instance starts with an empty
-# cache and the sub-hourly/sub-weekly segments stay blank until a fresh fetch.
-if [ -d "$src/cache" ]; then
-	rm -rf "$agent/cache"
-	ln -sfn "$src/cache" "$agent/cache"
-fi
-
 # Override the system prompt (pi loads SYSTEM.md from the agent dir). Kept
 # minimal and flags this as a throwaway test instance on a live paid
 # subscription so the model stays frugal.

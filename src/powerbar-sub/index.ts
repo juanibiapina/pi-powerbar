@@ -17,10 +17,12 @@ interface RateWindow {
 	label: string;
 	usedPercent: number;
 	resetDescription?: string;
+	resetAt?: string;
 }
 
 interface UsageCoreState {
 	provider?: string;
+	observedAt?: number;
 	usage?: {
 		windows: RateWindow[];
 	};
@@ -32,7 +34,30 @@ function getColor(pct: number): string {
 	return "muted";
 }
 
-function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | undefined, barSegments: number): void {
+function formatResetAt(resetAt: string | undefined, observedAt: number): string | undefined {
+	if (!resetAt) return undefined;
+	const resetTime = Date.parse(resetAt);
+	if (!Number.isFinite(resetTime)) return undefined;
+	const diffMs = resetTime - observedAt;
+	if (diffMs < 0) return "now";
+
+	const diffMins = Math.floor(diffMs / 60_000);
+	if (diffMins < 60) return `${diffMins}m`;
+	const hours = Math.floor(diffMins / 60);
+	const mins = diffMins % 60;
+	if (hours < 24) return mins > 0 ? `${hours}h${mins}m` : `${hours}h`;
+	const days = Math.floor(hours / 24);
+	const remainingHours = hours % 24;
+	return remainingHours > 0 ? `${days}d${remainingHours}h` : `${days}d`;
+}
+
+function emitWindow(
+	pi: ExtensionAPI,
+	segmentId: string,
+	window: RateWindow | undefined,
+	barSegments: number,
+	observedAt: number,
+): void {
 	if (!window) {
 		pi.events.emit("powerbar:update", { id: segmentId, text: undefined });
 		return;
@@ -40,7 +65,7 @@ function emitWindow(pi: ExtensionAPI, segmentId: string, window: RateWindow | un
 
 	const pct = Math.round(window.usedPercent);
 	const label = window.label || "";
-	const reset = window.resetDescription || "";
+	const reset = formatResetAt(window.resetAt, observedAt) ?? window.resetDescription ?? "";
 
 	const textParts: string[] = [];
 	if (label) textParts.push(label);
@@ -73,8 +98,10 @@ function emitUsage(pi: ExtensionAPI, state: UsageCoreState | undefined): void {
 		return;
 	}
 
-	emitWindow(pi, "sub-hourly", usage.windows[0], 5);
-	emitWindow(pi, "sub-weekly", usage.windows[1], 7);
+	const observedAt =
+		typeof state.observedAt === "number" && Number.isFinite(state.observedAt) ? state.observedAt : Date.now();
+	emitWindow(pi, "sub-hourly", usage.windows[0], 5, observedAt);
+	emitWindow(pi, "sub-weekly", usage.windows[1], 7, observedAt);
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
