@@ -71,8 +71,10 @@ pi.events.emit("powerbar:update", {
 | `context-usage` | Context window usage as a progress bar with percentage |
 | `provider` | Current LLM provider name (e.g. `anthropic`, `openai`) |
 | `model` | Current model name and thinking level |
-| `sub-hourly` | Hourly subscription usage from [pi-sub-core](https://github.com/marckrenn/pi-sub-core) |
-| `sub-weekly` | Weekly subscription usage from pi-sub-core |
+| `sub-hourly` | Hourly subscription usage from [pi-usage](https://github.com/juanibiapina/pi-usage) |
+| `sub-weekly` | Weekly subscription usage from pi-usage |
+
+Subscription usage resolves on session start, model selection, and turn end. It has no recurring refresh timer. All same-user Pi processes on one machine share endpoint freshness, leases, and retry deadlines through pi-usage.
 
 ### Configuration
 
@@ -116,9 +118,9 @@ config is never modified. Extra arguments pass through to pi.
 It inherits your real `enabledModels` (so every model you use is available) but
 defaults to Claude Sonnet 4.6 at medium thinking on the `anthropic` provider
 (your Claude subscription). Override with `PI_TEST_MODEL`, `PI_TEST_PROVIDER`,
-and `PI_TEST_THINKING`. It symlinks your `auth.json`, model catalog, and the
-`cache/` dir (so `pi-usage` subscription segments populate) and writes a minimal
-`SYSTEM.md` that marks the instance as a throwaway test on a live subscription.
+and `PI_TEST_THINKING`. It symlinks your `auth.json` and model catalog; pi-usage
+uses its normal same-user machine state. The script writes a minimal `SYSTEM.md`
+that marks the instance as a throwaway test on a live subscription.
 
 ## License
 
