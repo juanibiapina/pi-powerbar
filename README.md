@@ -70,7 +70,7 @@ pi.events.emit("powerbar:update", {
 | `tokens` | Cumulative input/output tokens, cache reads (`R`) and writes (`W`), the latest assistant request's cache hit rate (`CH`), and session cost (e.g. `↑3.0k ↓400 R20k W2.0k CH80.0% $0.15`). `R` and `W` are session totals; `CH` covers only the most recent request |
 | `context-usage` | Context window usage as a progress bar with percentage |
 | `provider` | Current LLM provider name (e.g. `anthropic`, `openai`) |
-| `model` | Current model name and thinking level |
+| `model` | Current model name and thinking level. With a virtual model, also the model and thinking level that answered last (e.g. `auto · high → claude-haiku-4-5 · medium`) |
 | `sub-hourly` | Hourly subscription usage from [pi-usage](https://github.com/juanibiapina/pi-usage) |
 | `sub-weekly` | Weekly subscription usage from pi-usage |
 
