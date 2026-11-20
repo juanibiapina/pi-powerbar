@@ -9,6 +9,7 @@
 
 import type { ExtensionAPI, ExtensionContext, MessageEndEvent } from "@earendil-works/pi-coding-agent";
 
+// Not exported by pi; virtual models carry this api (core/virtual-models.ts).
 const VIRTUAL_MODEL_API = "pi-virtual";
 
 type Route = { model: string; thinkingLevel?: string };
