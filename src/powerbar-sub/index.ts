@@ -65,9 +65,9 @@ function formatAmounts(window: RateWindow): string | undefined {
 }
 
 function formatOverage(window: RateWindow): string | undefined {
-	if (!window.overage) return undefined;
+	if (!window.overage || !(window.overage.charges > 0)) return undefined;
 	const { charges, currency } = window.overage;
-	return `+${currency === "USD" ? "$" : `${currency} `}${charges.toFixed(2)}`;
+	return `(+${currency === "USD" ? "$" : `${currency} `}${charges.toFixed(2)})`;
 }
 
 function emitWindow(
@@ -87,18 +87,18 @@ function emitWindow(
 	const label = window.label || "";
 	const reset = formatResetAt(window.resetAt, observedAt) ?? window.resetDescription ?? "";
 
+	const amounts = options.amounts ? formatAmounts(window) : undefined;
+	const overage = options.overage ? formatOverage(window) : undefined;
+
 	const textParts: string[] = [];
 	if (label) textParts.push(label);
-	const amounts = options.amounts ? formatAmounts(window) : undefined;
-	if (amounts) textParts.push(amounts);
-	const overage = options.overage ? formatOverage(window) : undefined;
-	if (overage) textParts.push(overage);
-	if (reset) textParts.push(reset);
+	if (amounts && reset) textParts.push(`${amounts} · ${reset}`);
+	else if (amounts || reset) textParts.push(amounts ?? reset);
 
 	pi.events.emit("powerbar:update", {
 		id: segmentId,
 		text: textParts.join(" "),
-		suffix: `${pct}%`,
+		suffix: overage ? `${pct}% ${overage}` : `${pct}%`,
 		bar: pct,
 		barSegments,
 		color: getColor(pct),

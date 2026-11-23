@@ -65,7 +65,7 @@ test("tokens splits main and subagent cost when cost-breakdown is on", async () 
 	const { pi, emitted, fire } = createPi();
 	createTokensExtension(pi);
 	await fire("session_start", {}, tokensCtx);
-	assert.equal(last(emitted, "tokens").text, "↑300 ↓30 $1.00 (main $0.75, sub $0.25)");
+	assert.equal(last(emitted, "tokens").text, "↑300 ↓30 $1.00 ($0.75+$0.25)");
 });
 
 const kiroUsage = {
@@ -99,7 +99,40 @@ test("sub segment shows only label, reset and percent by default", () => {
 
 test("sub segment shows amounts and overage when enabled", () => {
 	useSettings({ "sub-amounts": "on", "sub-overage": "on" });
-	assert.equal(subText().text, "Credits 7748/5000 +$109.93 7d");
+	const update = subText();
+	assert.equal(update.text, "Credits 7748/5000 · 7d");
+	assert.equal(update.suffix, "155% (+$109.93)");
+});
+
+const withOverage = (overage) => ({
+	...kiroUsage,
+	windows: [{ ...kiroUsage.windows[0], overage }],
+});
+
+function subUpdate(usage) {
+	const { pi, emitted } = createPi();
+	createSubExtension(pi);
+	pi.events.emit("usage-core:update-current", { state: { provider: "kiro", usage } });
+	return last(emitted, "sub-hourly");
+}
+
+test("each sub option works on its own", () => {
+	useSettings({ "sub-amounts": "on" });
+	let update = subUpdate(kiroUsage);
+	assert.equal(update.text, "Credits 7748/5000 · 7d");
+	assert.equal(update.suffix, "155%");
+
+	useSettings({ "sub-overage": "on" });
+	update = subUpdate(kiroUsage);
+	assert.equal(update.text, "Credits 7d");
+	assert.equal(update.suffix, "155% (+$109.93)");
+});
+
+test("sub overage is hidden when nothing is charged", () => {
+	useSettings({ "sub-overage": "on" });
+	for (const overage of [undefined, { charges: 0, currency: "USD" }]) {
+		assert.equal(subUpdate(withOverage(overage)).suffix, "155%");
+	}
 });
 
 test("sub options ignore providers without amounts or overage", () => {

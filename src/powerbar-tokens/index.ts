@@ -110,7 +110,7 @@ function formatCost(state: TokenState, breakdown: boolean): string {
 	const total = `$${state.totalCost.toFixed(2)}`;
 	if (!breakdown) return total;
 	const main = state.totalCost - state.subCost;
-	return `${total} (main $${main.toFixed(2)}, sub $${state.subCost.toFixed(2)})`;
+	return `${total} ($${main.toFixed(2)}+$${state.subCost.toFixed(2)})`;
 }
 
 function emitTotals(pi: ExtensionAPI, state: TokenState, breakdown: boolean): void {
