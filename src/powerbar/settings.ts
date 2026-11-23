@@ -55,6 +55,27 @@ export function registerSettings(pi: ExtensionAPI, segmentOptions: OrderedListOp
 			values: ["continuous", "blocks"],
 		},
 		{
+			id: "cost-breakdown",
+			label: "Cost breakdown",
+			description: "Tokens segment: split the session cost into main agent and subagents",
+			defaultValue: "off",
+			values: ["off", "on"],
+		},
+		{
+			id: "sub-amounts",
+			label: "Subscription amounts",
+			description: "Sub segments: show used/limit amounts (e.g. Kiro credits) next to the percentage",
+			defaultValue: "off",
+			values: ["off", "on"],
+		},
+		{
+			id: "sub-overage",
+			label: "Subscription overage",
+			description: "Sub segments: show charges accrued beyond the plan allowance, when the provider reports them",
+			defaultValue: "off",
+			values: ["off", "on"],
+		},
+		{
 			id: "bar-width",
 			label: "Bar width",
 			description: "Width of progress bars in characters",
@@ -92,4 +113,11 @@ export function loadSettings(cwd = process.cwd()): PowerbarSettings {
 		barStyle: barStyle === "continuous" ? "continuous" : "blocks",
 		barWidth: Math.max(4, Math.min(24, Number.parseInt(barWidthStr, 10) || 10)),
 	};
+}
+
+export type ProducerFlag = "cost-breakdown" | "sub-amounts" | "sub-overage";
+
+/** Read an on/off setting at emit time so producers pick up changes without a reload. */
+export function readFlag(id: ProducerFlag, cwd?: string): boolean {
+	return getSetting(EXTENSION_NAME, id, "off", cwd ? { cwd } : {}) === "on";
 }

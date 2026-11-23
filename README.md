@@ -88,6 +88,9 @@ Settings are managed through [`pi-extension-settings`](https://github.com/juanib
 | **Placement** | Where the powerbar appears (`belowEditor` or `aboveEditor`) | `belowEditor` |
 | **Bar style** | Visual style of progress bars (`continuous` or `blocks`) | `blocks` |
 | **Bar width** | Width of progress bars in characters (4–24) | `10` |
+| **Cost breakdown** | `tokens` segment: show the session cost split into main agent and subagents, e.g. `$1.00 (main $0.75, sub $0.25)`. Subagent cost is the usage attached to tool results | `off` |
+| **Subscription amounts** | `sub-*` segments: show used/limit next to the percentage (e.g. `Credits 7748/5000`), for providers that report them (Kiro) | `off` |
+| **Subscription overage** | `sub-*` segments: show charges beyond the plan allowance (e.g. `+$109.93`), for providers that report them (Kiro) | `off` |
 
 The left and right segment settings open an interactive menu where you can toggle segments on/off and reorder them with Shift+↑/↓. All segments registered via `powerbar:register-segment` appear as options. Segments not listed in either side are ignored.
 

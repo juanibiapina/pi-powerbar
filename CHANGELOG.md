@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional `Cost breakdown` setting splits the `tokens` session cost into main agent and subagents.
+- Optional `Subscription amounts` and `Subscription overage` settings show used/limit and overage charges in the `sub-*` segments when the provider reports them.
+
 ## [0.17.0] - 2026-11-23
 
 ### Added

@@ -12,12 +12,16 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { readFlag } from "../powerbar/settings.js";
 
 interface RateWindow {
 	label: string;
 	usedPercent: number;
 	resetDescription?: string;
 	resetAt?: string;
+	used?: number;
+	limit?: number;
+	overage?: { charges: number; currency: string };
 }
 
 interface UsageCoreState {
@@ -51,12 +55,28 @@ function formatResetAt(resetAt: string | undefined, observedAt: number): string 
 	return remainingHours > 0 ? `${days}d${remainingHours}h` : `${days}d`;
 }
 
+function formatAmount(value: number): string {
+	return Number.isInteger(value) ? String(value) : value.toFixed(0);
+}
+
+function formatAmounts(window: RateWindow): string | undefined {
+	if (window.used === undefined || window.limit === undefined) return undefined;
+	return `${formatAmount(window.used)}/${formatAmount(window.limit)}`;
+}
+
+function formatOverage(window: RateWindow): string | undefined {
+	if (!window.overage) return undefined;
+	const { charges, currency } = window.overage;
+	return `+${currency === "USD" ? "$" : `${currency} `}${charges.toFixed(2)}`;
+}
+
 function emitWindow(
 	pi: ExtensionAPI,
 	segmentId: string,
 	window: RateWindow | undefined,
 	barSegments: number,
 	observedAt: number,
+	options: { amounts: boolean; overage: boolean },
 ): void {
 	if (!window) {
 		pi.events.emit("powerbar:update", { id: segmentId, text: undefined });
@@ -69,6 +89,10 @@ function emitWindow(
 
 	const textParts: string[] = [];
 	if (label) textParts.push(label);
+	const amounts = options.amounts ? formatAmounts(window) : undefined;
+	if (amounts) textParts.push(amounts);
+	const overage = options.overage ? formatOverage(window) : undefined;
+	if (overage) textParts.push(overage);
 	if (reset) textParts.push(reset);
 
 	pi.events.emit("powerbar:update", {
@@ -100,8 +124,9 @@ function emitUsage(pi: ExtensionAPI, state: UsageCoreState | undefined): void {
 
 	const observedAt =
 		typeof state.observedAt === "number" && Number.isFinite(state.observedAt) ? state.observedAt : Date.now();
-	emitWindow(pi, "sub-hourly", usage.windows[0], 5, observedAt);
-	emitWindow(pi, "sub-weekly", usage.windows[1], 7, observedAt);
+	const options = { amounts: readFlag("sub-amounts"), overage: readFlag("sub-overage") };
+	emitWindow(pi, "sub-hourly", usage.windows[0], 5, observedAt, options);
+	emitWindow(pi, "sub-weekly", usage.windows[1], 7, observedAt, options);
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
