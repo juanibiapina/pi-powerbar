@@ -73,6 +73,7 @@ pi.events.emit("powerbar:update", {
 | `model` | Current model name and thinking level. With a virtual model, also the model and thinking level that answered last (e.g. `auto · high → claude-haiku-4-5 · medium`) |
 | `sub-hourly` | Hourly subscription usage from [pi-usage](https://github.com/juanibiapina/pi-usage) |
 | `sub-weekly` | Weekly subscription usage from pi-usage |
+| `sub-overage` | Charges beyond the plan allowance (e.g. `$112.93 over`), for providers that report them (Kiro). Empty when nothing is charged. Not in the default layout; add it to the right segments |
 
 Subscription usage resolves on session start, model selection, and turn end. It has no recurring refresh timer. All same-user Pi processes on one machine share endpoint freshness, leases, and retry deadlines through pi-usage.
 
@@ -89,8 +90,9 @@ Settings are managed through [`pi-extension-settings`](https://github.com/juanib
 | **Bar style** | Visual style of progress bars (`continuous` or `blocks`) | `blocks` |
 | **Bar width** | Width of progress bars in characters (4–24) | `10` |
 | **Cost breakdown** | `tokens` segment: show the session cost split into main agent and subagents, e.g. `$1.00 ($0.75+$0.25)`. Subagent cost is the usage attached to tool results | `off` |
-| **Subscription amounts** | `sub-*` segments: show used/limit next to the percentage (e.g. `Credits 7748/5000 · 7d`), for providers that report them (Kiro) | `off` |
-| **Subscription overage** | `sub-*` segments: show charges beyond the plan allowance (e.g. `155% (+$109.93)`), only when above zero, for providers that report them (Kiro) | `off` |
+| **Subscription amounts** | `sub-*` segments: show used/limit (e.g. `Credits 7748/5000`), for providers that report them (Kiro) | `off` |
+| **Subscription reset** | `sub-*` segments: show the time until the window resets | `on` |
+| **Subscription bar** | `sub-*` segments: show the progress bar and percentage | `on` |
 
 The left and right segment settings open an interactive menu where you can toggle segments on/off and reorder them with Shift+↑/↓. All segments registered via `powerbar:register-segment` appear as options. Segments not listed in either side are ignored.
 

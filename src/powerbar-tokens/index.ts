@@ -181,7 +181,7 @@ export default function createExtension(pi: ExtensionAPI): void {
 			if (entries.length === prevCount && leafId === prevLeaf) return;
 		}
 
-		emitTotals(pi, state, readFlag("cost-breakdown", ctx.cwd));
+		emitTotals(pi, state, readFlag("cost-breakdown", false, ctx.cwd));
 	}
 
 	// Restore totals immediately when starting or switching sessions.

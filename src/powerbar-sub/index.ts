@@ -8,7 +8,7 @@
  * The state includes a `provider` field — when absent (e.g. Bedrock model),
  * we clear the segments.
  *
- * Segment IDs: "sub-hourly", "sub-weekly"
+ * Segment IDs: "sub-hourly", "sub-weekly", "sub-overage"
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -67,7 +67,13 @@ function formatAmounts(window: RateWindow): string | undefined {
 function formatOverage(window: RateWindow): string | undefined {
 	if (!window.overage || !(window.overage.charges > 0)) return undefined;
 	const { charges, currency } = window.overage;
-	return `(+${currency === "USD" ? "$" : `${currency} `}${charges.toFixed(2)})`;
+	return `${currency === "USD" ? "$" : `${currency} `}${charges.toFixed(2)} over`;
+}
+
+interface WindowOptions {
+	amounts: boolean;
+	reset: boolean;
+	bar: boolean;
 }
 
 function emitWindow(
@@ -76,7 +82,7 @@ function emitWindow(
 	window: RateWindow | undefined,
 	barSegments: number,
 	observedAt: number,
-	options: { amounts: boolean; overage: boolean },
+	options: WindowOptions,
 ): void {
 	if (!window) {
 		pi.events.emit("powerbar:update", { id: segmentId, text: undefined });
@@ -85,29 +91,33 @@ function emitWindow(
 
 	const pct = Math.round(window.usedPercent);
 	const label = window.label || "";
-	const reset = formatResetAt(window.resetAt, observedAt) ?? window.resetDescription ?? "";
-
+	const reset = options.reset ? (formatResetAt(window.resetAt, observedAt) ?? window.resetDescription ?? "") : "";
 	const amounts = options.amounts ? formatAmounts(window) : undefined;
-	const overage = options.overage ? formatOverage(window) : undefined;
 
 	const textParts: string[] = [];
 	if (label) textParts.push(label);
-	if (amounts && reset) textParts.push(`${amounts} · ${reset}`);
-	else if (amounts || reset) textParts.push(amounts ?? reset);
+	const details = [amounts, reset].filter(Boolean).join(" · ");
+	if (details) textParts.push(details);
 
 	pi.events.emit("powerbar:update", {
 		id: segmentId,
 		text: textParts.join(" "),
-		suffix: overage ? `${pct}% ${overage}` : `${pct}%`,
-		bar: pct,
+		suffix: options.bar ? `${pct}%` : undefined,
+		bar: options.bar ? pct : undefined,
 		barSegments,
 		color: getColor(pct),
 	});
 }
 
+function emitOverage(pi: ExtensionAPI, windows: RateWindow[]): void {
+	const text = windows.map(formatOverage).find(Boolean);
+	pi.events.emit("powerbar:update", { id: "sub-overage", text, color: "error" });
+}
+
 function clearSegments(pi: ExtensionAPI): void {
 	pi.events.emit("powerbar:update", { id: "sub-hourly", text: undefined });
 	pi.events.emit("powerbar:update", { id: "sub-weekly", text: undefined });
+	pi.events.emit("powerbar:update", { id: "sub-overage", text: undefined });
 }
 
 function emitUsage(pi: ExtensionAPI, state: UsageCoreState | undefined): void {
@@ -124,14 +134,20 @@ function emitUsage(pi: ExtensionAPI, state: UsageCoreState | undefined): void {
 
 	const observedAt =
 		typeof state.observedAt === "number" && Number.isFinite(state.observedAt) ? state.observedAt : Date.now();
-	const options = { amounts: readFlag("sub-amounts"), overage: readFlag("sub-overage") };
+	const options = {
+		amounts: readFlag("sub-amounts", false),
+		reset: readFlag("sub-reset", true),
+		bar: readFlag("sub-bar", true),
+	};
 	emitWindow(pi, "sub-hourly", usage.windows[0], 5, observedAt, options);
 	emitWindow(pi, "sub-weekly", usage.windows[1], 7, observedAt, options);
+	emitOverage(pi, usage.windows);
 }
 
 export default function createExtension(pi: ExtensionAPI): void {
 	pi.events.emit("powerbar:register-segment", { id: "sub-hourly", label: "Sub Hourly" });
 	pi.events.emit("powerbar:register-segment", { id: "sub-weekly", label: "Sub Weekly" });
+	pi.events.emit("powerbar:register-segment", { id: "sub-overage", label: "Sub Overage" });
 
 	pi.events.on("usage-core:ready", (payload: unknown) => {
 		emitUsage(pi, (payload as { state?: UsageCoreState }).state);

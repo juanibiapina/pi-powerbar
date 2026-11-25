@@ -64,15 +64,22 @@ export function registerSettings(pi: ExtensionAPI, segmentOptions: OrderedListOp
 		{
 			id: "sub-amounts",
 			label: "Subscription amounts",
-			description: "Sub segments: show used/limit amounts (e.g. Kiro credits) next to the percentage",
+			description: "Sub segments: show used/limit amounts (e.g. Kiro credits)",
 			defaultValue: "off",
 			values: ["off", "on"],
 		},
 		{
-			id: "sub-overage",
-			label: "Subscription overage",
-			description: "Sub segments: show charges accrued beyond the plan allowance, when the provider reports them",
-			defaultValue: "off",
+			id: "sub-reset",
+			label: "Subscription reset",
+			description: "Sub segments: show the time until the window resets",
+			defaultValue: "on",
+			values: ["off", "on"],
+		},
+		{
+			id: "sub-bar",
+			label: "Subscription bar",
+			description: "Sub segments: show the progress bar and percentage",
+			defaultValue: "on",
 			values: ["off", "on"],
 		},
 		{
@@ -115,9 +122,9 @@ export function loadSettings(cwd = process.cwd()): PowerbarSettings {
 	};
 }
 
-export type ProducerFlag = "cost-breakdown" | "sub-amounts" | "sub-overage";
+export type ProducerFlag = "cost-breakdown" | "sub-amounts" | "sub-reset" | "sub-bar";
 
 /** Read an on/off setting at emit time so producers pick up changes without a reload. */
-export function readFlag(id: ProducerFlag, cwd?: string): boolean {
-	return getSetting(EXTENSION_NAME, id, "off", cwd ? { cwd } : {}) === "on";
+export function readFlag(id: ProducerFlag, defaultOn: boolean, cwd?: string): boolean {
+	return getSetting(EXTENSION_NAME, id, defaultOn ? "on" : "off", cwd ? { cwd } : {}) === "on";
 }

@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Optional `Cost breakdown` setting splits the `tokens` session cost into main agent and subagents.
-- Optional `Subscription amounts` and `Subscription overage` settings show used/limit and overage charges in the `sub-*` segments when the provider reports them.
+- Optional `Subscription amounts` setting shows used/limit in the `sub-*` segments when the provider reports them.
+- `Subscription reset` and `Subscription bar` settings (default on) hide the reset time and the progress bar and percentage in the `sub-*` segments.
+- `sub-overage` segment shows charges beyond the plan allowance when the provider reports them. It is empty when nothing is charged and is not in the default layout.
 
 ## [0.17.0] - 2026-11-23
 

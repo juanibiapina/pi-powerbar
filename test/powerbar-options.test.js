@@ -83,63 +83,79 @@ const kiroUsage = {
 	],
 };
 
-function subText() {
+function subUpdates(usage = kiroUsage) {
 	const { pi, emitted } = createPi();
 	createSubExtension(pi);
-	pi.events.emit("usage-core:update-current", { state: { provider: "kiro", usage: kiroUsage } });
-	return last(emitted, "sub-hourly");
+	pi.events.emit("usage-core:update-current", { state: { provider: "kiro", usage } });
+	return { credits: last(emitted, "sub-hourly"), overage: last(emitted, "sub-overage") };
 }
-
-test("sub segment shows only label, reset and percent by default", () => {
-	useSettings({});
-	const update = subText();
-	assert.equal(update.text, "Credits 7d");
-	assert.equal(update.suffix, "155%");
-});
-
-test("sub segment shows amounts and overage when enabled", () => {
-	useSettings({ "sub-amounts": "on", "sub-overage": "on" });
-	const update = subText();
-	assert.equal(update.text, "Credits 7748/5000 · 7d");
-	assert.equal(update.suffix, "155% (+$109.93)");
-});
 
 const withOverage = (overage) => ({
 	...kiroUsage,
 	windows: [{ ...kiroUsage.windows[0], overage }],
 });
 
-function subUpdate(usage) {
-	const { pi, emitted } = createPi();
-	createSubExtension(pi);
-	pi.events.emit("usage-core:update-current", { state: { provider: "kiro", usage } });
-	return last(emitted, "sub-hourly");
-}
-
-test("each sub option works on its own", () => {
-	useSettings({ "sub-amounts": "on" });
-	let update = subUpdate(kiroUsage);
-	assert.equal(update.text, "Credits 7748/5000 · 7d");
-	assert.equal(update.suffix, "155%");
-
-	useSettings({ "sub-overage": "on" });
-	update = subUpdate(kiroUsage);
-	assert.equal(update.text, "Credits 7d");
-	assert.equal(update.suffix, "155% (+$109.93)");
+test("sub segment shows label, reset, bar and percent by default", () => {
+	useSettings({});
+	const { credits } = subUpdates();
+	assert.equal(credits.text, "Credits 7d");
+	assert.equal(credits.suffix, "155%");
+	assert.equal(credits.bar, 155);
 });
 
-test("sub overage is hidden when nothing is charged", () => {
-	useSettings({ "sub-overage": "on" });
+test("sub amounts toggle shows used/limit before the reset", () => {
+	useSettings({ "sub-amounts": "on" });
+	assert.equal(subUpdates().credits.text, "Credits 7748/5000 · 7d");
+});
+
+test("sub reset toggle hides the time until reset", () => {
+	useSettings({ "sub-reset": "off" });
+	assert.equal(subUpdates().credits.text, "Credits");
+	useSettings({ "sub-reset": "off", "sub-amounts": "on" });
+	assert.equal(subUpdates().credits.text, "Credits 7748/5000");
+});
+
+test("sub bar toggle hides the bar and percentage", () => {
+	useSettings({ "sub-bar": "off" });
+	const { credits } = subUpdates();
+	assert.equal(credits.text, "Credits 7d");
+	assert.equal(credits.bar, undefined);
+	assert.equal(credits.suffix, undefined);
+});
+
+test("every sub toggle can be off, leaving only the label", () => {
+	useSettings({ "sub-reset": "off", "sub-bar": "off" });
+	assert.equal(subUpdates().credits.text, "Credits");
+});
+
+test("sub-overage is its own segment, independent of the credits display", () => {
+	useSettings({ "sub-reset": "off", "sub-bar": "off" });
+	const { credits, overage } = subUpdates();
+	assert.equal(overage.text, "$109.93 over");
+	assert.equal(overage.color, "error");
+	assert.equal(credits.text, "Credits");
+});
+
+test("sub-overage is hidden when nothing is charged", () => {
+	useSettings({});
 	for (const overage of [undefined, { charges: 0, currency: "USD" }]) {
-		assert.equal(subUpdate(withOverage(overage)).suffix, "155%");
+		assert.equal(subUpdates(withOverage(overage)).overage.text, undefined);
 	}
 });
 
-test("sub options ignore providers without amounts or overage", () => {
-	useSettings({ "sub-amounts": "on", "sub-overage": "on" });
+test("sub-overage clears when the provider has no usage", () => {
+	useSettings({});
 	const { pi, emitted } = createPi();
 	createSubExtension(pi);
+	pi.events.emit("usage-core:update-current", { state: { provider: "kiro", usage: kiroUsage } });
+	pi.events.emit("usage-core:update-current", { state: {} });
+	assert.equal(last(emitted, "sub-overage").text, undefined);
+});
+
+test("sub options ignore providers without amounts or overage", () => {
+	useSettings({ "sub-amounts": "on" });
 	const usage = { provider: "anthropic", windows: [{ label: "5h", usedPercent: 7, resetDescription: "1h" }] };
-	pi.events.emit("usage-core:update-current", { state: { provider: "anthropic", usage } });
-	assert.equal(last(emitted, "sub-hourly").text, "5h 1h");
+	const { credits, overage } = subUpdates(usage);
+	assert.equal(credits.text, "5h 1h");
+	assert.equal(overage.text, undefined);
 });
