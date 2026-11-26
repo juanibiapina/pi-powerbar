@@ -4,7 +4,7 @@
   "description": "Pi extension that renders a persistent powerline status bar with left/right segments updated via events",
   "type": "module",
   "scripts": {
-    "test": "node --test --import tsx test/*.test.js",
+    "test": "node --import ./test/isolate-settings.mjs --test --import tsx test/*.test.js",
     "check": "biome check --write --error-on-warnings . && tsc --noEmit"
   },
   "files": [

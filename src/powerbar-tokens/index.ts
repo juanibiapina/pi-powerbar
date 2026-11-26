@@ -12,6 +12,7 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { readFlag } from "../powerbar/settings.js";
 
 type EntryUsage = {
 	input: number;
@@ -36,14 +37,16 @@ function formatTokens(count: number): string {
 	return `${Math.round(count / 1000000)}M`;
 }
 
-function extractUsage(entry: TokenEntry): { usage: EntryUsage; isAssistant: boolean } | undefined {
+function extractUsage(entry: TokenEntry): { usage: EntryUsage; isAssistant: boolean; isSub: boolean } | undefined {
 	if (entry.type === "message" && (entry.message?.role === "assistant" || entry.message?.role === "toolResult")) {
 		const usage = entry.message?.usage;
 		if (!usage) return undefined;
-		return { usage, isAssistant: entry.message?.role === "assistant" };
+		const isAssistant = entry.message?.role === "assistant";
+		// Only tool results carry usage of work done outside the main agent loop (subagents).
+		return { usage, isAssistant, isSub: !isAssistant };
 	}
 	if ((entry.type === "branch_summary" || entry.type === "compaction") && entry.usage) {
-		return { usage: entry.usage, isAssistant: false };
+		return { usage: entry.usage, isAssistant: false, isSub: false };
 	}
 	return undefined;
 }
@@ -63,6 +66,8 @@ interface TokenState {
 	totalCacheRead: number;
 	totalCacheWrite: number;
 	totalCost: number;
+	/** Part of totalCost that came from tool results (subagent runs). */
+	subCost: number;
 	latestCacheHitRate: number | undefined;
 }
 
@@ -78,6 +83,7 @@ function applyEntry(state: TokenState, entry: TokenEntry): void {
 	state.totalCacheRead += cacheRead;
 	state.totalCacheWrite += cacheWrite;
 	state.totalCost += usage.cost.total;
+	if (extracted.isSub) state.subCost += usage.cost.total;
 
 	if (extracted.isAssistant) {
 		const promptTokens = usage.input + cacheRead + cacheWrite;
@@ -100,7 +106,14 @@ function canIncrement(prev: TokenState, entries: TokenEntry[], leafId: string | 
 	return true;
 }
 
-function emitTotals(pi: ExtensionAPI, state: TokenState): void {
+function formatCost(state: TokenState, breakdown: boolean): string {
+	const total = `$${state.totalCost.toFixed(2)}`;
+	if (!breakdown) return total;
+	const main = state.totalCost - state.subCost;
+	return `${total} ($${main.toFixed(2)}+$${state.subCost.toFixed(2)})`;
+}
+
+function emitTotals(pi: ExtensionAPI, state: TokenState, breakdown: boolean): void {
 	if (state.totalInput === 0 && state.totalOutput === 0) {
 		pi.events.emit("powerbar:update", {
 			id: "tokens",
@@ -122,7 +135,7 @@ function emitTotals(pi: ExtensionAPI, state: TokenState): void {
 		parts.push(`CH${state.latestCacheHitRate.toFixed(1)}%`);
 	}
 	if (state.totalCost > 0) {
-		parts.push(`$${state.totalCost.toFixed(2)}`);
+		parts.push(formatCost(state, breakdown));
 	}
 
 	pi.events.emit("powerbar:update", {
@@ -152,6 +165,7 @@ export default function createExtension(pi: ExtensionAPI): void {
 				totalCacheRead: 0,
 				totalCacheWrite: 0,
 				totalCost: 0,
+				subCost: 0,
 				latestCacheHitRate: undefined,
 			};
 			for (const entry of entries) applyEntry(fresh, entry);
@@ -167,7 +181,7 @@ export default function createExtension(pi: ExtensionAPI): void {
 			if (entries.length === prevCount && leafId === prevLeaf) return;
 		}
 
-		emitTotals(pi, state);
+		emitTotals(pi, state, readFlag("cost-breakdown", false, ctx.cwd));
 	}
 
 	// Restore totals immediately when starting or switching sessions.
