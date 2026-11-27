@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.18.0] - 2026-11-27
 
 ### Added
 
@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional `Subscription amounts` setting shows used/limit in the `sub-*` segments when the provider reports them.
 - `Subscription reset` and `Subscription bar` settings (default on) hide the reset time and the progress bar and percentage in the `sub-*` segments.
 - `sub-overage` segment shows charges beyond the plan allowance when the provider reports them. It is empty when nothing is charged and is not in the default layout.
+
+### Fixed
+
+- Kiro subscription usage shows real credit usage, including overage, instead of 0%. It needs a Kiro login in Pi.
 
 ## [0.17.0] - 2026-11-23
 
